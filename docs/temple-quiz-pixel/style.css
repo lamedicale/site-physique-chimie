@@ -1,0 +1,410 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#182817;font-family:"Press Start 2P",monospace;color:#fff}
+body{display:grid;place-items:center;background:linear-gradient(#2795db 0 24%,#78a431 24%)}
+#shell{position:relative;width:100vw;height:100vh;overflow:hidden;background:#22391f}
+canvas{width:100%;height:100%;display:block;object-fit:cover;image-rendering:pixelated;image-rendering:crisp-edges}
+.screen{position:absolute;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:22px;background:rgba(35,65,30,.68);text-align:center;animation:screenIn .26s steps(4,end)}.hidden{display:none!important}
+/* Écrans de menu : laisser voir le décor pixel animé du canvas */
+#menu,#levelSelect,#chapterScreen,#characters,#how{background:linear-gradient(rgba(26,15,30,.34),rgba(12,20,8,.52))}
+#menu h1{text-shadow:5px 5px 0 #9b3b16,9px 9px 0 #101b12,0 0 18px rgba(255,158,60,.5)}
+@keyframes screenIn{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:scale(1)}}
+.panel{padding:20px;border:5px solid #101b12;background:repeating-linear-gradient(135deg,#304432 0 5px,#263b2d 5px 10px);box-shadow:7px 7px 0 #101b12;max-width:860px}
+h1{margin:0;color:#ffe35b;font-size:clamp(28px,6vw,68px);line-height:1.25;text-shadow:5px 5px 0 #9b3b16,9px 9px 0 #101b12}.sub{color:#e9f5cc;font-size:12px;line-height:1.8}
+button{font:inherit;color:#fff;border:5px solid #101b12;background:#eb5a0b;padding:13px 17px;box-shadow:5px 5px 0 #101b12;cursor:pointer;line-height:1.5;animation:buttonFloat 2.4s steps(2,end) infinite}button:nth-of-type(even){animation-delay:.35s}button:hover{filter:brightness(1.15);transform:translate(-2px,-2px)}button:active{transform:translate(4px,4px);box-shadow:1px 1px #101b12}.menuButtons{display:grid;grid-template-columns:1fr 1fr;gap:14px;width:min(650px,92%)}.menuButtons button:first-child{grid-column:1/-1;background:#e9640e;font-size:15px}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;width:min(760px,95%)}.card{background:#364c35;min-height:110px}.card.selected{background:#557445;outline:4px solid #ffe35b}.settingRow{display:flex;align-items:center;justify-content:space-between;gap:20px;margin:12px 0;font-size:10px}.settingRow button{animation:none}
+@keyframes buttonFloat{50%{transform:translateY(-3px)}}@keyframes titlePulse{50%{transform:translateY(-4px)}}#menu h1{animation:titlePulse 2s steps(3,end) infinite}
+.chapters{display:grid;grid-template-columns:repeat(3,minmax(180px,1fr));gap:11px;max-width:900px;width:100%;max-height:65vh;overflow:auto;padding:8px}.chap{font-size:10px;background:#364c35;text-align:left;min-height:72px}.chap b{color:#ffe35b;display:block;margin-bottom:7px}
+/* Sélection de niveau : GRILLE EN FLUX. Le navigateur place tous les médaillons (chapitres +
+   cryptes + ruines) automatiquement → ils sont TOUJOURS tous visibles, sans positionnement
+   absolu (fiable même en file://). Scroll vertical si la liste dépasse. */
+.levelGrid{position:relative;display:grid;grid-template-columns:repeat(auto-fit,minmax(122px,1fr));gap:30px 18px;
+ width:min(960px,96%);max-height:66vh;overflow-y:auto;padding:30px 20px;justify-items:center;align-items:center;
+ image-rendering:pixelated;border:5px solid #101b12;box-shadow:7px 7px 0 #101b12;border-radius:4px;
+ /* FOND : VRAIE carte du monde pixel-art (continent + biomes) générée en JS (mapWorldTexture),
+    appliquée en background-image inline. Le bleu océan ci-dessous est un secours avant le JS.
+    Le SENTIER reliant les nœuds est un overlay SVG (#mapTrail) injecté en JS, sous les médaillons. */
+ background-color:#2a6a92}
+/* ── NŒUD MÉDAILLON (design enrichi) : double cadre pixel, fond bombé (radial), liseré or,
+   bannière de numéro, reflets. Beaucoup moins "sommaire". ── */
+.mapNode{position:relative;width:120px;height:134px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:0;padding:15px 7px 7px;font-size:8px;
+ background:var(--biome,#43603f);
+ background:radial-gradient(circle at 50% 30%,color-mix(in srgb,var(--biome,#43603f) 80%,#ffffff) 0%,var(--biome,#43603f) 50%,color-mix(in srgb,var(--biome,#43603f) 64%,#101b12) 100%);
+ border:3px solid #101b12;border-radius:9px;
+ box-shadow:0 0 0 2px #f4d779,0 0 0 5px #101b12,5px 6px 0 #101b12,inset 0 2px 0 rgba(255,255,255,.28),inset 0 -3px 4px rgba(0,0,0,.4);
+ z-index:2;line-height:1.25;text-align:center;overflow:visible;isolation:isolate}
+/* reflet diagonal qui balaie le médaillon (vie) */
+.mapNode::before{content:"";position:absolute;inset:0;border-radius:6px;pointer-events:none;
+ background:linear-gradient(115deg,transparent 38%,rgba(255,255,255,.32) 48%,transparent 58%);
+ background-size:240% 240%;animation:nodeSheen 4.5s ease-in-out infinite;z-index:5;mix-blend-mode:screen}
+@keyframes nodeSheen{0%,60%{background-position:140% 0}100%{background-position:-40% 0}}
+/* survol : pas de déplacement (le nœud reste centré) — éclat + halo + reflet plus vif.
+   On force transform:translate(-50%,-50%) au survol/clic pour neutraliser la règle générique
+   button:hover/active (translate(-2px..)/translate(4px..)). !important pour battre la cascade. */
+.mapNode:hover,.cryptNode:hover,.ruinsNode:hover{transform:translateY(-3px) scale(1.05)!important}
+.mapNode:active,.cryptNode:active,.ruinsNode:active{transform:scale(.97)!important}
+.mapNode:hover{filter:brightness(1.18) saturate(1.12);box-shadow:0 0 0 2px #fff0a8,0 0 0 5px #101b12,4px 5px 0 #101b12,0 0 18px rgba(255,227,91,.7),inset 0 2px 0 rgba(255,255,255,.35),inset 0 -3px 4px rgba(0,0,0,.4);z-index:4}
+.mapNode:active{filter:brightness(.96)}
+.mapNode.done{box-shadow:0 0 0 2px #ffe35b,0 0 0 5px #101b12,4px 5px 0 #101b12,0 0 10px rgba(255,227,91,.45),inset 0 2px 0 rgba(255,255,255,.3),inset 0 -3px 4px rgba(0,0,0,.4)}
+.mapNode.done::after{content:"";position:absolute;top:-6px;right:-6px;width:16px;height:16px;border-radius:50%;background:radial-gradient(circle,#fff6c0 30%,#f4c038 70%);box-shadow:0 0 0 2px #101b12,0 0 8px rgba(255,210,60,.8);z-index:6}
+.mapNode.locked{background:radial-gradient(circle at 50% 32%,#7a7466,#3f3a30 100%);filter:grayscale(.45) brightness(.95);opacity:.96;
+ box-shadow:0 0 0 2px #8a8472,0 0 0 5px #101b12,4px 5px 0 #101b12,inset 0 2px 0 rgba(255,255,255,.18),inset 0 -3px 4px rgba(0,0,0,.4)}
+.mapNode.locked::before{animation:none;opacity:.25}
+.mapNode.current{animation:nodeBob 2.1s ease-in-out infinite,nodePulse 1.2s steps(2,end) infinite}
+.mapNode.current{box-shadow:0 0 0 2px #aef0ff,0 0 0 5px #101b12,4px 5px 0 #101b12,0 0 14px rgba(110,210,255,.7),inset 0 2px 0 rgba(255,255,255,.3),inset 0 -3px 4px rgba(0,0,0,.4)}
+@keyframes nodePulse{50%{box-shadow:0 0 0 2px #dffaff,0 0 0 5px #101b12,4px 5px 0 #101b12,0 0 22px rgba(110,210,255,.95),inset 0 2px 0 rgba(255,255,255,.3),inset 0 -3px 4px rgba(0,0,0,.4)}}
+/* léger flottement vertical du nœud courant */
+@keyframes nodeBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+/* entrée des nœuds (apparition rebond) + icône qui respire doucement */
+@keyframes nodePop{0%{opacity:0;transform:scale(.3)}65%{opacity:1;transform:scale(1.12)}82%{transform:scale(.95)}100%{opacity:1;transform:scale(1)}}
+.mapNode{animation:nodePop .5s cubic-bezier(.34,1.56,.64,1) backwards}
+@keyframes iconBreathe{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-2px) scale(1.06)}}
+/* VIGNETTE BIOME encadrée (petit panneau intérieur sombre) — identité visuelle nette */
+.mapNode .nodeIcon{line-height:0;display:flex;align-items:center;justify-content:center;
+ width:52px;height:52px;margin-bottom:5px;border:3px solid #101b12;border-radius:5px;
+ background:radial-gradient(circle at 50% 35%,rgba(20,30,20,.5),rgba(8,14,8,.72));
+ box-shadow:inset 0 2px 0 rgba(255,255,255,.16),inset 0 -3px 5px rgba(0,0,0,.5),0 2px 0 #101b12;
+ filter:drop-shadow(1px 1px 0 #101b12);animation:iconBreathe 2.4s ease-in-out infinite;z-index:3}
+.mapNode.locked .nodeIcon{animation:none}
+.mapNode .nodeIconCv{image-rendering:pixelated;display:block}
+/* bannière de numéro en haut du médaillon */
+.mapNode .nodeNum{position:absolute;top:-10px;left:50%;transform:translateX(-50%);min-width:20px;height:20px;padding:0 5px;display:flex;align-items:center;justify-content:center;color:#3a2400;font-size:12px;background:linear-gradient(180deg,#ffe884,#f1b531);border:2px solid #101b12;border-radius:5px;box-shadow:0 2px 0 #101b12;text-shadow:none;z-index:7}
+/* NOM : bandeau bas contrasté (fond semi-opaque), 1 ligne avec ellipsis */
+.mapNode .nodeName{font-size:7.5px;color:#fff;text-shadow:1px 1px #101b12;z-index:3;margin-top:auto;width:calc(100% + 2px);
+ white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.3;letter-spacing:.3px;
+ padding:3px 4px;border-radius:0 0 5px 5px;background:linear-gradient(180deg,rgba(16,27,18,.55),rgba(16,27,18,.82))}
+.mapNode .nodeStars{display:flex;gap:3px;z-index:3;height:11px;margin-top:5px;margin-bottom:2px}
+.mapNode .nodeStars canvas,.mapNode .nodeStars svg{width:11px;height:11px}
+.mapNode .nodeBest{position:absolute;top:-7px;right:-7px;font-size:7px;color:#101b12;background:linear-gradient(180deg,#ffe884,#f1b531);border:2px solid #101b12;border-radius:4px;padding:1px 3px;z-index:7;line-height:1}
+/* emblème de biome agrandi (rendu pixel net) dans la vignette */
+.mapNode .nodeIcon canvas{width:38px;height:38px}
+/* ── RUINES (boss final) : médaillon plus grand, palette pierre/or, même structure cadre/vignette/bandeau ── */
+.ruinsNode{width:138px;height:152px;padding:17px 8px 8px;background:radial-gradient(circle at 50% 30%,#e0b455,#caa24a 50%,#6a4a22 100%)}
+.ruinsNode .nodeIcon{width:62px;height:62px}
+.ruinsNode .nodeIcon canvas{width:46px;height:46px}
+.ruinsNode .nodeName{font-size:8.5px;color:#fff5d8}
+.ruinsNode .nodeNum{background:linear-gradient(180deg,#fff0b8,#e7a82a);font-size:13px}
+.ruinsNode.unlocked{background:radial-gradient(circle at 50% 30%,#f3d27a,#e7c061 50%,#a8761f 100%);box-shadow:0 0 0 2px #ffe35b,0 0 0 5px #101b12,5px 6px 0 #101b12,0 0 16px rgba(255,180,60,.6),inset 0 2px 0 rgba(255,255,255,.3),inset 0 -3px 4px rgba(0,0,0,.4);animation:nodeBob 2.4s ease-in-out infinite,ruinsGlow 1.6s steps(3,end) infinite}
+.ruinsNode.locked{background:radial-gradient(circle at 50% 35%,#6a6256,#4a443a 50%,#2c2820 100%);filter:grayscale(.6)}
+/* ── CRYPTE : médaillon violet, plus petit que les niveaux mais même structure ── */
+.cryptNode{width:104px;height:118px;padding:13px 6px 6px;background:radial-gradient(circle at 50% 30%,#7459904d,#5a4a6e 50%,#332642 100%);background:radial-gradient(circle at 50% 30%,#806a9e,#5a4a6e 50%,#332642 100%);box-shadow:0 0 0 2px #8d6fb8,0 0 0 5px #1a1226,5px 6px 0 #1a1226,inset 0 2px 0 rgba(255,255,255,.22),inset 0 -3px 4px rgba(0,0,0,.45)}
+.cryptNode .nodeIcon{width:46px;height:46px;margin-bottom:4px}
+.cryptNode .nodeIcon canvas{width:34px;height:34px}
+.cryptNode .nodeName{font-size:7px;color:#e9ddff}
+.cryptNode .nodeNum{display:none}
+.cryptNode.done{box-shadow:0 0 0 2px #c8a4ff,0 0 0 5px #1a1226,4px 5px 0 #1a1226,0 0 10px rgba(185,140,255,.55),inset 0 2px 0 rgba(255,255,255,.22),inset 0 -3px 4px rgba(0,0,0,.45)}
+.cryptNode.locked{background:radial-gradient(circle at 50% 35%,#3a3340,#241f2a 100%);filter:grayscale(.7) brightness(.82)}
+@keyframes ruinsGlow{50%{box-shadow:0 0 0 2px #fff0c0,0 0 0 5px #101b12,4px 5px 0 #101b12,0 0 24px rgba(255,180,60,.9),inset 0 2px 0 rgba(255,255,255,.3),inset 0 -3px 4px rgba(0,0,0,.4)}}
+.shakeNode{animation:shakeNode .4s steps(4,end)!important}@keyframes shakeNode{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.levelCards{display:grid;grid-template-columns:1fr 1fr;gap:20px;width:min(620px,92%);margin-top:6px}.levelCard{background:#364c35;min-height:140px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center}.levelCard b{color:#ffe35b;font-size:34px}.levelCard small{font-size:8px;line-height:1.7;color:#cfe0c4}.levelCard:nth-child(2){background:#3a4456}
+.quiz{max-width:760px;width:94%;text-align:left}.quiz h2{color:#ffe35b;font-size:14px;line-height:1.7}
+.quizClock{margin:10px 0 4px;height:14px;background:#101b12;border:3px solid #101b12;box-shadow:inset 0 0 0 2px #2c3f28;overflow:hidden}.quizClock.hidden{display:none}.quizClockBar{height:100%;width:100%;background:#8fe6a0;transition:width .12s linear,background .2s}.answers{display:grid;gap:10px;margin-top:16px}.answers button{text-align:left;background:#3c5639;font-size:10px}.answers button.correct{background:#37a64b}.answers button.wrong{background:#b33b32}
+.explainBox{margin-top:14px;background:rgba(16,27,18,.62);border:4px solid #101b12;padding:12px 14px;font-size:9px;line-height:1.7}.explainBox.hidden{display:none}.explainBox b{display:block;font-size:10px;margin-bottom:6px}.explainBox .exGood{color:#8fe6a0}.explainBox .exBad{color:#ff8b80}.explainBox span{display:block;color:#e9f4dc}
+.continueBtn{display:block;margin:14px auto 0;background:#d6a23e;color:#221}.continueBtn.hidden{display:none}
+.revExp{display:block;margin:3px 0 7px 14px;color:#cfe0c5;font-style:normal;line-height:1.6;opacity:.92}
+.diagram{display:none;width:100%;max-width:520px;aspect-ratio:400/210;height:auto;margin:12px auto;border:5px solid #101b12;background:#dce9cf;image-rendering:pixelated}.diagram.show{display:block}
+#hud{position:absolute;inset:0;z-index:4;pointer-events:none;text-shadow:2px 2px #101b12}.hudbox{position:absolute;padding:10px;border:4px solid #101b12;background:repeating-linear-gradient(135deg,rgba(35,55,39,.92) 0 4px,rgba(48,70,49,.92) 4px 8px);box-shadow:4px 4px #101b12;font-size:9px;line-height:1.7}.stats{left:14px;top:14px}.mission{right:14px;top:14px;text-align:right}.hint{left:50%;bottom:13px;transform:translateX(-50%);background:#eb5a0b;white-space:nowrap}
+.touchControls{display:none;position:absolute;inset:0;z-index:7;pointer-events:none;opacity:.88}.joystick{position:absolute;left:22px;bottom:24px;width:104px;height:104px;border:6px solid #101b12;background:#d84d08;box-shadow:6px 6px #101b12;pointer-events:auto;touch-action:none}.stick{position:absolute;left:32px;top:32px;width:32px;height:32px;border:5px solid #101b12;background:#ff9a22;box-shadow:3px 3px #101b12}.touchBtn{position:absolute;width:68px;height:68px;border-radius:0;padding:5px;animation:none;pointer-events:auto;touch-action:none}.whipBtn{right:18px;bottom:24px}.actBtn{right:96px;bottom:54px;background:#3f7044}.dashBtn{right:104px;bottom:138px;background:#2f7fa5}.dashBtn:active{filter:brightness(1.25)}.escapeBtn{left:50%;bottom:30%;transform:translateX(-50%);width:96px;height:96px;background:#e8a01c;animation:escPulse .5s steps(2,end) infinite}.escapeBtn.hidden{display:none}.escapeBtn:active{filter:brightness(1.3);transform:translateX(-50%) scale(.94)}.escapeBtn span{font-size:30px}@keyframes escPulse{0%{box-shadow:6px 6px #101b12}50%{box-shadow:6px 6px #101b12,0 0 0 6px rgba(232,160,28,.5)}}.touchBtn span{display:block;font-size:20px;margin-bottom:4px}.touchBtn small{font-size:6px}
+.pheart,.pstar,.pcoin{position:relative;display:inline-block;width:21px;height:18px;margin:0 2px;vertical-align:middle}.pheart:before{content:"";position:absolute;width:3px;height:3px;background:#ff514d;box-shadow:3px -3px #ff514d,6px -3px #ff514d,9px 0 #ff514d,12px -3px #ff514d,15px -3px #ff514d,18px 0 #ff514d,15px 3px #ff514d,12px 6px #ff514d,9px 9px #ff514d,6px 6px #ff514d,3px 3px #ff514d}.pstar:before{content:"";position:absolute;left:0;top:0;width:3px;height:3px;background:#ffe35b;box-shadow:9px 0 #ffe35b,12px 0 #ffe35b,9px 3px #ffe35b,12px 3px #ffe35b,0 6px #ffe35b,3px 6px #ffe35b,6px 6px #ffe35b,9px 6px #fff09b,12px 6px #ffe35b,15px 6px #ffe35b,18px 6px #ffe35b,3px 9px #ffe35b,6px 9px #ffe35b,9px 9px #ffe35b,12px 9px #ffe35b,15px 9px #ffe35b,6px 12px #ffe35b,9px 12px #ffe35b,12px 12px #ffe35b,15px 12px #ffe35b,3px 15px #ffe35b,6px 15px #ffe35b,15px 15px #ffe35b,18px 15px #ffe35b}.pstar.off{filter:grayscale(1);opacity:.35}.pcoin:before{content:"";position:absolute;width:3px;height:3px;background:#f6bd3b;box-shadow:3px -3px #f6bd3b,6px -3px #ffe66a,9px -3px #ffe66a,12px -3px #f6bd3b,15px 0 #d88b25,15px 3px #d88b25,15px 6px #d88b25,12px 9px #d88b25,9px 9px #d88b25,6px 9px #d88b25,3px 9px #d88b25,0 6px #f6bd3b,0 3px #f6bd3b,6px 0 #fff09b,9px 3px #fff09b}
+.hearts{color:#ff4747;letter-spacing:4px}.gold{color:#ffe35b}.result{font-size:12px;line-height:2;max-height:78vh;overflow:auto}.result strong{display:block;color:#ffe35b;font-size:30px;margin:10px}
+.review{margin:14px auto 4px;max-width:640px;text-align:left;background:rgba(16,27,18,.5);border:4px solid #101b12;padding:10px;font-size:8px;line-height:1.6}.review b{display:block;color:#ffe35b;margin-bottom:8px;font-size:10px}.rev{margin:3px 0}.rev.ok{color:#8fe6a0}.rev.ko{color:#ff8b80}
+.newbadge{margin:10px auto;color:#101b12;background:#ffe35b;border:4px solid #101b12;padding:7px 10px;font-size:9px;display:inline-block;animation:titlePulse 1.4s steps(3,end) infinite}
+.totals{margin-top:12px;color:#e9f5cc;font-size:10px}
+/* ── ÉCRAN DE FIN DE NIVEAU REDESIGNÉ ─────────────────────────────────────────────────────── */
+#result .panel.result{background:none;border:0;box-shadow:none;padding:0;max-height:82vh;overflow:auto}
+.resCard{display:flex;flex-direction:column;align-items:center;gap:12px;width:min(640px,94vw);margin:0 auto;
+ padding:20px 18px 18px;border:5px solid #101b12;border-radius:3px;
+ background:linear-gradient(165deg,rgba(30,46,30,.96),rgba(16,27,18,.97));box-shadow:9px 9px 0 #101b12;
+ animation:resPop .45s cubic-bezier(.2,1.3,.4,1) both}
+@keyframes resPop{0%{opacity:0;transform:translateY(18px) scale(.92)}100%{opacity:1;transform:none}}
+.resCard.won{box-shadow:9px 9px 0 #101b12,0 0 40px rgba(110,224,110,.22)}
+.resCard.lost{box-shadow:9px 9px 0 #101b12,0 0 40px rgba(220,80,60,.18)}
+.resBanner{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;
+ padding:10px 8px;border:4px solid #101b12;border-radius:2px;
+ background:repeating-linear-gradient(135deg,rgba(255,227,91,.16) 0 6px,rgba(255,227,91,.06) 6px 12px)}
+.resCard.lost .resBanner{background:repeating-linear-gradient(135deg,rgba(255,120,90,.14) 0 6px,rgba(255,120,90,.05) 6px 12px)}
+.resTitle{color:#ffe35b;font-size:clamp(15px,3.4vw,22px);text-shadow:2px 2px #101b12;text-align:center}
+.resCard.lost .resTitle{color:#ff9a86}
+.resWreath{width:18px;height:26px;flex:0 0 auto;background:
+ radial-gradient(circle at 60% 30%,#7bd86a 30%,transparent 32%),radial-gradient(circle at 40% 55%,#5fbf52 30%,transparent 32%),radial-gradient(circle at 65% 78%,#7bd86a 28%,transparent 30%)}
+.resWreath.r{transform:scaleX(-1)}
+.resStars{display:flex;gap:6px;justify-content:center;transform:scale(1.5);margin:4px 0 8px}
+.resStars .pstar{animation:starPing .5s steps(3,end) both}
+.resStars .pstar:nth-child(2){animation-delay:.14s}.resStars .pstar:nth-child(3){animation-delay:.28s}
+@keyframes starPing{0%{opacity:0;transform:scale(.2) rotate(-30deg)}100%{opacity:1;transform:none}}
+.resProg{font-size:9px;color:#cfe0c4;letter-spacing:1px}
+.resTiles{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:100%}
+.resTile{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:9px 4px;
+ border:3px solid #101b12;border-radius:2px;background:rgba(22,36,24,.85)}
+.resTile b{font-size:13px;color:#fff;display:flex;align-items:center;gap:3px}
+.resTile small{font-size:6px;color:#9fc294;letter-spacing:.5px}
+.resTile.sc b{color:#ffe35b}.resTile.cb b{color:#9ad6ff}.resTile.er b{color:#ff9a86}.resTile.tm b{color:#cfe0c4}
+.resRewards{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.resReward{display:flex;align-items:center;gap:5px;padding:6px 12px;border:3px solid #101b12;border-radius:2px;font-size:9px;
+ animation:rewardPop .4s steps(3,end) both}
+@keyframes rewardPop{0%{transform:scale(.5);opacity:0}100%{transform:none;opacity:1}}
+.resReward.rubis{background:#7a1422;color:#ffd7de}
+.resReward.badge{background:#ffe35b;color:#101b12}
+.resTotals{display:flex;align-items:center;gap:5px;justify-content:center;margin-top:4px;font-size:9px;color:#e9f5cc;
+ border-top:2px solid rgba(255,255,255,.12);padding-top:10px;width:100%}
+.resCard .review{margin:4px 0 0;width:100%;max-width:none}
+@media(max-width:560px){.resTiles{grid-template-columns:repeat(2,1fr)}}
+.profLink{margin-top:18px;font-size:8px;background:#2c3f2d;padding:8px 12px;opacity:.85}
+/* Menu principal : panneau centré semi-transparent par-dessus le décor pixel plein cadre */
+#menu{justify-content:center;align-items:center;padding:0}
+.menuPanel{display:flex;flex-direction:column;align-items:center;gap:16px;width:min(440px,90%);margin:0;padding:28px 24px;background:linear-gradient(160deg,rgba(28,42,26,.86),rgba(16,27,18,.9));border:5px solid #101b12;box-shadow:9px 9px 0 #101b12;border-radius:2px}
+.menuPanel h1{font-size:clamp(26px,4.4vw,46px)}
+.menuTag{font-size:9px;line-height:1.9;color:#dceccf;max-width:340px}
+.playBtn{background:#e9640e;font-size:18px;padding:16px 18px;animation:playPulse 1.8s steps(3,end) infinite}
+@keyframes playPulse{50%{transform:translateY(-4px);filter:brightness(1.12)}}
+.dashWrap{width:min(760px,95%);max-height:62vh;overflow:auto;text-align:left}
+.dashSummary{color:#ffe35b;font-size:10px;margin-bottom:10px}
+.dashEmpty{color:#cfe0c5;font-size:10px;line-height:1.8;background:rgba(16,27,18,.5);border:4px solid #101b12;padding:16px}
+.dashCard{background:rgba(16,27,18,.55);border:4px solid #101b12;padding:11px 13px;margin-bottom:10px;font-size:8px;line-height:1.6}
+.dashChName{color:#ffe35b;font-size:10px;margin-bottom:6px}
+.dashStats{color:#e9f4dc}
+.dashMissed{margin-top:8px;color:#ff9b91}.dashMissed b{display:block;color:#ffd0c8;margin-bottom:4px}.dashMissed div{margin:2px 0}.dashMissed span{color:#caa}
+.dashBtns{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:16px}
+.comboHud{position:absolute;left:50%;top:64px;transform:translateX(-50%);z-index:5;color:#ffe35b;font-size:13px;text-shadow:2px 2px #101b12,0 0 8px #eb5a0b;pointer-events:none;opacity:0;transition:opacity .2s}.comboHud.show{opacity:1}
+@media(max-width:720px){#shell{width:100vw;height:100vh}.screen{justify-content:flex-start;gap:12px;padding:18px 10px;overflow-y:auto}.screen h1{font-size:26px!important;margin-top:8px}.panel{padding:13px;max-width:96%;font-size:8px}.menuButtons,.cards,.levelCards{grid-template-columns:1fr}.menuButtons button:first-child{grid-column:auto}.levelCard{min-height:96px}.chapters{grid-template-columns:1fr;max-height:none;overflow:visible}.chap{min-height:58px}.hudbox{font-size:6px;padding:5px;border-width:3px}.stats{left:5px;top:5px}.mission{right:5px;top:5px;max-width:55%}.hint{display:none}.quiz{font-size:8px}.quiz h2{font-size:10px}.diagram{height:130px}.answers button{font-size:8px;padding:9px}.pheart{transform:scale(.72);transform-origin:left center;margin-right:-4px}.touchControls{display:block}}
+@media(pointer:coarse){.touchControls{display:block}}
+/* ===== Accessibilité ===== */
+/* Taille du texte du quiz */
+body.text-grand .quiz h2{font-size:18px}body.text-grand .answers button{font-size:13px;padding:16px 18px}body.text-grand .explainBox{font-size:11px}body.text-grand .review{font-size:10px}body.text-grand #question{line-height:1.8}
+body.text-petit .quiz h2{font-size:11px}body.text-petit .answers button{font-size:9px;padding:10px 13px}body.text-petit .explainBox{font-size:8px}
+/* Symboles ✓ / ✗ + liseré épais (pas seulement la couleur) */
+body.symbols-on .answers button.correct{outline:4px solid #d6ffd9}body.symbols-on .answers button.correct::before{content:"\2713  ";font-weight:bold}
+body.symbols-on .answers button.wrong{outline:4px solid #ffd2cd}body.symbols-on .answers button.wrong::before{content:"\2717  ";font-weight:bold}
+/* Focus clavier net */
+.answers button:focus-visible,.continueBtn:focus-visible{outline:5px solid #ffe35b;outline-offset:2px;filter:brightness(1.18)}
+.answers button:focus{outline:5px solid #ffe35b;outline-offset:2px}
+/* ===== Pause ===== */
+.pauseToggle{position:absolute;right:14px;bottom:14px;z-index:14;width:38px;height:38px;padding:0;font-size:12px;background:#2f4a32;border:4px solid #101b12;box-shadow:3px 3px 0 #101b12;animation:none;letter-spacing:2px}.pauseToggle:hover{filter:brightness(1.2);transform:translateY(-2px)}.pauseToggle:active{transform:translateY(2px);box-shadow:1px 1px #101b12}
+.pauseMenu{position:absolute;inset:0;z-index:30;display:flex;align-items:center;justify-content:center;background:rgba(20,32,18,.78)}
+.pausePanel{display:flex;flex-direction:column;gap:14px;padding:26px 30px;border:5px solid #101b12;background:repeating-linear-gradient(135deg,#304432 0 5px,#263b2d 5px 10px);box-shadow:7px 7px 0 #101b12;min-width:260px;text-align:center}
+.pausePanel h2{margin:0 0 6px;color:#ffe35b;font-size:20px;text-shadow:3px 3px 0 #9b3b16}
+.pausePanel button{font-size:12px}
+@media(max-width:720px){.pauseToggle{right:8px;bottom:8px;width:40px;height:40px}}
+
+/* ════════════════════════════════════════════════════════════════════════════════════════════
+   THÈME RPG (style « pixel-art GUI » : bois + parchemin, bordures biseautées, boutons pilules vertes)
+   ════════════════════════════════════════════════════════════════════════════════════════════ */
+:root{
+ --wood-dark:#5a3c24;--wood:#7a542f;--wood-light:#9c6e3e;--wood-rim:#3a2614;
+ --parch:#e9d7ac;--parch-dark:#d8c08a;--parch-shadow:#b89a64;--ink:#3a2c18;
+ --frame-blue:#aeb9c8;--frame-blue-d:#7d8aa0;
+ --rpg-green:#5aa44e;--rpg-green-d:#3c7a36;--rpg-green-l:#7ec96f;
+ --bar-red:#c8453f;--bar-green:#73c24a;--bar-blue:#4fa3e6;--bar-gold:#e6b43a;--bar-purple:#a86fd0;
+}
+/* Panneau « bois » : double cadre (rim sombre + planche) avec intérieur parchemin. */
+.rpgPanel{
+ position:relative;padding:18px;border:5px solid var(--wood-rim);
+ background:
+   linear-gradient(180deg,var(--wood-light) 0 6px,var(--wood) 6px 100%);
+ box-shadow:0 0 0 5px var(--frame-blue-d),0 0 0 9px var(--wood-rim),9px 11px 0 rgba(16,12,6,.45);
+ image-rendering:pixelated;
+}
+.rpgPanel>.rpgInner{
+ border:5px solid var(--wood-rim);
+ background:
+   repeating-linear-gradient(0deg,var(--parch) 0 7px,var(--parch-dark) 7px 8px);
+ box-shadow:inset 0 0 0 3px var(--parch-shadow);
+ padding:16px 18px;color:var(--ink);
+}
+/* En-tête type « onglet » posé sur le panneau. */
+.rpgTab{display:inline-block;margin:0 auto 6px;padding:8px 22px;color:#fff8e6;font-size:16px;
+ background:linear-gradient(180deg,var(--wood-light),var(--wood));border:4px solid var(--wood-rim);
+ box-shadow:0 4px 0 var(--wood-rim),inset 0 0 0 2px rgba(255,235,190,.25);text-shadow:2px 2px 0 var(--wood-rim);letter-spacing:1px}
+
+/* Boutons RPG : pilule verte biseautée. Applique le thème aux écrans concernés. */
+#menu button,#skills button,#characters button,#levelSelect button,#settings button,#how button,#result button,#chapterScreen button,.pausePanel button{
+ color:#fff8e6;border:4px solid var(--wood-rim);position:relative;overflow:hidden;
+ background:linear-gradient(180deg,var(--rpg-green-l) 0 5px,var(--rpg-green) 5px 100%);
+ box-shadow:0 4px 0 var(--rpg-green-d),0 7px 0 var(--wood-rim);
+ text-shadow:1px 1px 0 var(--rpg-green-d);animation:none;border-radius:3px;padding:12px 16px;
+ transition:transform .08s steps(2),filter .12s,box-shadow .08s;
+ max-width:100%;white-space:normal;overflow-wrap:break-word;word-break:break-word;margin-bottom:7px}
+/* IDLE : léger balancement vertical des boutons (vie) — map-nodes EXCLUS (ils ont leur propre anim). */
+#menu .menuButtons button,#levelSelect>button,.pausePanel button{animation:btnBreath 2.8s ease-in-out infinite}
+#menu .menuButtons button:nth-child(2n){animation-delay:.4s}#menu .menuButtons button:nth-child(3n){animation-delay:.8s}
+.pausePanel button:nth-child(2n){animation-delay:.35s}
+@keyframes btnBreath{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
+/* reflet qui balaie le bouton au survol */
+#menu button::after,#skills button::after,#characters button::after,#levelSelect button::after,#settings button::after,#how button::after,#result button::after,.pausePanel button::after{content:"";position:absolute;top:0;left:-60%;width:45%;height:100%;pointer-events:none;
+ background:linear-gradient(105deg,transparent,rgba(255,255,255,.45),transparent);transform:skewX(-18deg);transition:left .45s ease;z-index:1}
+#menu button:hover::after,#skills button:hover::after,#characters button:hover::after,#levelSelect button:hover::after,#settings button:hover::after,#how button:hover::after,#result button:hover::after,.pausePanel button:hover::after{left:130%}
+#menu button:hover,#skills button:hover,#characters button:hover,#levelSelect button:hover,#settings button:hover,#how button:hover,#result button:hover,#chapterScreen button:not(.mapNode):not(.cryptNode):not(.ruinsNode):hover,.pausePanel button:hover{filter:brightness(1.13) saturate(1.08);transform:translateY(-2px) scale(1.03);box-shadow:0 6px 0 var(--rpg-green-d),0 9px 0 var(--wood-rim),0 0 14px rgba(255,227,91,.35);animation:none}
+#menu button:active,#skills button:active,#characters button:active,#levelSelect button:active,#settings button:active,#how button:active,#result button:active,#chapterScreen button:not(.mapNode):not(.cryptNode):not(.ruinsNode):active,.pausePanel button:active{transform:translateY(3px) scale(.98);box-shadow:0 1px 0 var(--rpg-green-d),0 2px 0 var(--wood-rim);animation:none}
+.playBtn,#menu .playBtn{background:linear-gradient(180deg,#f1a64e 0 5px,#e07f24 5px 100%)!important;box-shadow:0 4px 0 #a85912,0 7px 0 var(--wood-rim)!important;text-shadow:1px 1px 0 #a85912;animation:playPulse 1.8s ease-in-out infinite}
+@keyframes playPulse{0%,100%{transform:translateY(0);box-shadow:0 4px 0 #a85912,0 7px 0 var(--wood-rim)}50%{transform:translateY(-3px);box-shadow:0 7px 0 #a85912,0 10px 0 var(--wood-rim),0 0 16px rgba(255,180,80,.5)}}
+/* BOUTON RETOUR : pilule pierre/brun (action secondaire) bien distincte des boutons verts d'action.
+   Flèche ◀ devant le libellé. Survol/clic héritent des transitions génériques. */
+.backBtn{background:linear-gradient(180deg,#6e6354 0 5px,#4a4236 5px 100%)!important;box-shadow:0 4px 0 #2c281f,0 7px 0 var(--wood-rim)!important;text-shadow:1px 1px 0 #2c281f!important;animation:none!important;font-size:11px;letter-spacing:1px}
+.backBtn:hover{filter:brightness(1.12)!important;box-shadow:0 6px 0 #2c281f,0 9px 0 var(--wood-rim),0 0 12px rgba(220,200,150,.35)!important}
+/* Confinement : aucun bouton/texte ne doit dépasser de sa zone. */
+.menuButtons{gap:16px 14px;padding-bottom:8px}
+.menuButtons button{width:100%;min-width:0;font-size:11px}
+.menuButtons .playBtn{font-size:15px}
+#menu button,#skills button,#characters button,#levelSelect button,#settings button,#how button,#result button,#chapterScreen button{min-width:0}
+#levelSelect .levelCard,#characters .charBases button{white-space:normal;overflow-wrap:break-word}
+
+/* Menu principal re-skinné en panneau bois/parchemin. */
+.menuPanel{background:linear-gradient(180deg,var(--wood-light) 0 7px,var(--wood) 7px 100%)!important;
+ border:5px solid var(--wood-rim)!important;
+ box-shadow:0 0 0 5px var(--frame-blue-d),0 0 0 9px var(--wood-rim),10px 12px 0 rgba(16,12,6,.45)!important;border-radius:3px}
+.menuPanel h1{color:#ffe9a8;text-shadow:4px 4px 0 #8a4a16,7px 7px 0 var(--wood-rim)}
+.menuTag{color:#f4e6c4}
+
+/* ── ÉCRAN COMPÉTENCES (arbre) ─────────────────────────────────────────────────────────────── */
+#skills{justify-content:flex-start;padding-top:3vh;overflow-y:auto}
+#skills h1{color:#ffe9a8;text-shadow:4px 4px 0 #8a4a16,7px 7px 0 var(--wood-rim)}
+.rubisBalance{display:inline-flex;align-items:center;gap:8px;font-size:14px;color:#fff3c4;
+ background:linear-gradient(180deg,var(--wood-light),var(--wood));border:4px solid var(--wood-rim);
+ box-shadow:0 4px 0 var(--wood-rim);padding:8px 16px;margin:2px 0 4px}
+.rubisGem{display:inline-block;width:16px;height:16px;background:
+  conic-gradient(from 45deg,#ff5d6c,#c8273a,#ff8b96,#c8273a);transform:rotate(45deg);
+  border:2px solid #7a1422;box-shadow:inset 2px 2px 0 rgba(255,255,255,.4)}
+/* ── ARBRE DE COMPÉTENCES — 100% PIXEL-ART (coins nets, aplats, ombres dures, zéro flou) ── */
+.skillTree{display:flex;flex-direction:column;align-items:center;justify-content:center;
+ width:min(720px,96%);max-height:72vh;overflow:auto;margin:8px auto;padding:14px;image-rendering:pixelated;
+ background:radial-gradient(circle at 50% 50%,#1d3324 0%,#16261a 60%,#101d14 100%);
+ border:4px solid var(--wood-rim);box-shadow:0 0 0 4px var(--frame-blue-d),0 0 0 8px var(--wood-rim),6px 8px 0 rgba(16,12,6,.5)}
+/* scène EN ÉTOILE : racine au centre, branches rayonnant vers les 4 coins (carrée). */
+.treeStage.star{position:relative;width:100%;max-width:560px;margin:0 auto}
+.treeStage{position:relative;width:100%;min-width:0;margin:0 auto}
+.treeSvg{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none;shape-rendering:crispEdges}
+/* CONNECTEURS façon « câble RPG » : trait sombre épais (base) sous un liseré (dim/lit).
+   Au repos (dim) : bronze terne. Acquis (lit) : or lumineux avec halo. */
+.treeBranch{fill:none;stroke:#1c140b;stroke-linecap:round;stroke-linejoin:round}
+.treeBranch.dim{stroke:#6b5634}
+.treeBranch.lit{stroke:#f0c64e;filter:drop-shadow(0 0 4px rgba(240,198,78,.7))}
+/* tout nœud est centré sur sa position (left/top en %) */
+.treeNode{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;
+ justify-content:center;text-align:center;image-rendering:pixelated}
+/* racine au centre (le héros) : emblème PIXEL-ART pur — carré à coins biseautés en marches,
+   aplats francs (conic-gradient à étapes nettes, aucun dégradé lisse), bordure en escalier. */
+.treeRoot{z-index:5;gap:4px}
+.treeRoot .rootGem{width:42px;height:42px;position:relative;image-rendering:pixelated;
+ background:
+  /* facettes en aplats francs (4 quartiers nets, façon gemme pixel) */
+  conic-gradient(from 45deg,#ffe27a 0deg 90deg,#f4c534 90deg 180deg,#c8901e 180deg 270deg,#e0ad28 270deg 360deg);
+ clip-path:polygon(33% 0,67% 0,100% 33%,100% 67%,67% 100%,33% 100%,0 67%,0 33%);
+ box-shadow:0 0 0 3px #2a1d10}
+/* éclat carré pixel en haut-gauche (highlight dur, pas de halo flou) */
+.treeRoot .rootGem::before{content:"";position:absolute;left:7px;top:6px;width:8px;height:8px;background:#fff6cf}
+/* cœur sombre carré (centre de la gemme) */
+.treeRoot .rootGem::after{content:"";position:absolute;left:50%;top:50%;width:10px;height:10px;transform:translate(-50%,-50%) rotate(45deg);background:#8a5e12;box-shadow:0 0 0 2px #ffe27a}
+.treeRoot .rootLbl{font-size:9px;color:#ffe9a8;letter-spacing:1px;text-shadow:2px 2px 0 #101b12}
+/* tête de branche : icône + libellé sur un écusson pierre/or pixel (compact) */
+.treeHead{z-index:4;flex-direction:column;gap:2px;width:58px;padding:4px 3px;
+ background:linear-gradient(180deg,#3a2c18,#241a0e);border:3px solid #1c140b;
+ box-shadow:0 0 0 2px #6e5020,3px 4px 0 rgba(16,12,6,.5)}
+.treeHead canvas{width:24px;height:24px;flex:0 0 auto;image-rendering:pixelated;filter:grayscale(.6) brightness(.7)}
+.treeHead.lit{background:linear-gradient(180deg,#5a4220,#3a2a14);box-shadow:0 0 0 2px #d8a83c,0 0 12px rgba(216,168,60,.5),4px 5px 0 rgba(16,12,6,.5)}
+.treeHead.lit canvas{filter:none}
+.treeHeadLbl{font-size:6px;color:#ffe9a8;letter-spacing:.3px;text-shadow:1px 1px 0 #101b12;line-height:1.15;text-align:center}
+/* nœuds de paliers : PETITES plaques nettes, badge court (pas de phrase) */
+.treeNode:not(.treeRoot):not(.treeHead){width:54px;min-height:46px;z-index:3;gap:2px;
+ border:3px solid #1c140b;font-size:8px;padding:7px 3px 4px;line-height:1.2;
+ background:linear-gradient(180deg,#cdb98c,#b39a68);color:#3a2c14;
+ box-shadow:0 0 0 2px #8a7448,3px 4px 0 rgba(16,12,6,.45),inset 0 2px 0 rgba(255,255,255,.35),inset 0 -3px 5px rgba(0,0,0,.25);
+ box-sizing:border-box}
+/* pastille de palier : carré pixel (pas de cercle) en haut à gauche */
+.treeNode .nTier{position:absolute;top:-8px;left:-8px;width:16px;height:16px;line-height:12px;font-size:8px;
+ background:#3a2c10;color:#ffe9a8;border:3px solid var(--wood-rim);box-sizing:border-box}
+.treeNode .nLbl{font-size:8px;font-weight:bold;word-break:break-word}
+.treeNode .nCost{display:flex;align-items:center;justify-content:center;gap:2px;font-size:8px;color:#9a1828;
+ margin-top:auto;font-weight:bold}
+.treeNode .nCost .rubisGem{width:9px;height:9px}
+.treeNode.acquired{background:linear-gradient(180deg,#4ea35a,#357a40);color:#fff8e6;border-color:#173f1d;
+ box-shadow:0 0 0 2px #79c884,4px 5px 0 rgba(16,12,6,.45),inset 0 2px 0 rgba(255,255,255,.3),inset 0 -3px 5px rgba(0,0,0,.3)}
+.treeNode.acquired .nCost{color:#eafbe2}
+.treeNode.acquired .nTier{background:#173f1d}
+.treeNode.buyable{background:linear-gradient(180deg,#ffd75a,#e8b02f);color:#3a2c10;cursor:pointer;border-color:#7a5410;
+ box-shadow:0 0 0 2px #fff0b0,4px 5px 0 rgba(16,12,6,.45),inset 0 2px 0 rgba(255,255,255,.45),inset 0 -3px 5px rgba(0,0,0,.2);animation:nodePulseRpg 1.2s steps(2,end) infinite}
+.treeNode.buyable .nCost{color:#7a1422}
+.treeNode.buyable:hover{filter:brightness(1.07);transform:translate(-50%,calc(-50% - 2px))}
+.treeNode.buyable:active{transform:translate(-50%,calc(-50% + 2px));box-shadow:0 0 0 2px #fff0b0,1px 2px 0 rgba(16,12,6,.45),inset 0 0 0 2px #fff0b0}
+.treeNode.locked{filter:grayscale(.6) brightness(.78);opacity:.92}
+.treeNode.shakeNode{animation:nodeShake .4s}
+@keyframes nodeShake{0%,100%{transform:translate(-50%,-50%)}25%{transform:translate(calc(-50% - 4px),-50%)}75%{transform:translate(calc(-50% + 4px),-50%)}}
+@keyframes nodePulseRpg{50%{box-shadow:0 0 0 2px #fff0b0,4px 5px 0 rgba(16,12,6,.45),0 0 12px rgba(240,198,78,.7),inset 0 2px 0 rgba(255,255,255,.45)}}
+
+/* ── BARRES DE STATS (façon fiche perso de la référence) ──────────────────────────────────── */
+.statRow{display:flex;align-items:center;gap:8px;margin:6px 0}
+.statRow .statIcon{width:18px;height:18px;flex:0 0 auto;image-rendering:pixelated}
+.statBar{flex:1;height:14px;background:#7a6a48;border:3px solid var(--wood-rim);box-shadow:inset 0 0 0 2px #5a4a2c;position:relative;overflow:hidden}
+.statBar i{display:block;height:100%;background:var(--bar-green)}
+.statBar.hp i{background:var(--bar-red)}.statBar.breath i{background:var(--bar-blue)}
+.statBar .pips{position:absolute;inset:0;display:flex}.statBar .pips span{flex:1;border-right:1px solid rgba(58,38,20,.4)}
+
+/* ── ÉCRAN PERSONNAGE ─────────────────────────────────────────────────────────────────────── */
+#characters{justify-content:flex-start;padding-top:2.5vh;overflow-y:auto}
+#characters h1{color:#ffe9a8;text-shadow:4px 4px 0 #8a4a16,7px 7px 0 var(--wood-rim)}
+.charWrap2{display:flex;gap:20px;align-items:flex-start;justify-content:center;flex-wrap:wrap;width:min(900px,96%)}
+.charStage{flex:0 1 340px;min-width:300px}
+.charStage .rpgInner{display:flex;flex-direction:column;align-items:center;gap:12px}
+/* le perso au centre, une flèche collée de chaque côté */
+.charPreviewRow{display:flex;align-items:center;justify-content:center;gap:8px;width:100%}
+.charArrow{font-size:20px;padding:0;width:40px;height:140px;flex:0 0 auto;cursor:pointer;animation:none;color:#ffe9a8;
+ border:4px solid var(--wood-rim);background:linear-gradient(180deg,var(--wood-light) 0 5px,var(--wood) 5px 100%);
+ box-shadow:0 4px 0 var(--wood-rim);border-radius:3px;display:flex;align-items:center;justify-content:center}
+.charArrow:hover{filter:brightness(1.12)}.charArrow:active{transform:translateY(2px);box-shadow:0 2px 0 var(--wood-rim)}
+.charBaseName{color:#ffe9a8;font-size:14px;text-align:center;text-shadow:2px 2px 0 var(--wood-rim);letter-spacing:1px}
+.charBaseDesc{color:#f3e7c4;font-size:8px;line-height:1.5;text-align:center;max-width:290px;min-height:24px}
+.charDots{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;max-width:300px}
+.charThumb{width:40px;height:48px;padding:1px;cursor:pointer;animation:none;border:2px solid var(--wood-rim);
+ background:rgba(40,30,18,.55);box-shadow:0 2px 0 var(--wood-rim);border-radius:5px;display:flex;align-items:flex-end;justify-content:center;overflow:hidden}
+.charThumb canvas{display:block}
+.charThumb:hover{filter:brightness(1.18);transform:translateY(-2px)}
+.charThumb.on{background:rgba(255,227,91,.22);border-color:#ffe35b;box-shadow:0 0 8px rgba(255,227,91,.8),0 2px 0 var(--wood-rim)}
+.charRotRow{display:flex;align-items:center;justify-content:center;gap:10px}
+.charRotRow small{font-size:6px;color:#f3e7c4;letter-spacing:.5px}
+.charRotBtn{font-size:16px;width:34px;height:30px;padding:0;cursor:pointer;color:#ffe9a8;
+ background:var(--wood);border:2px solid var(--wood-rim);box-shadow:0 3px 0 var(--wood-rim)}
+.charRotBtn:hover{filter:brightness(1.12)}.charRotBtn:active{transform:translateY(2px);box-shadow:0 1px 0 var(--wood-rim)}
+.charRandom{font-size:9px;padding:7px 18px;margin:0}
+.charCustom{flex:0 1 360px;min-width:260px}
+.charCustom .rpgInner{display:flex;flex-direction:column;gap:11px}
+/* navigation paginée des catégories de personnalisation */
+.custNav{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%}
+.custArrow{font-size:16px;width:38px;height:38px;padding:0;flex:0 0 auto;cursor:pointer;animation:none;color:#ffe9a8;
+ border:3px solid var(--wood-rim);background:linear-gradient(180deg,var(--wood-light) 0 4px,var(--wood) 4px 100%);
+ box-shadow:0 3px 0 var(--wood-rim);border-radius:3px;display:flex;align-items:center;justify-content:center}
+.custArrow:hover{filter:brightness(1.12)}.custArrow:active{transform:translateY(2px);box-shadow:0 1px 0 var(--wood-rim)}
+.custTitle{flex:1;text-align:center;font-size:12px;letter-spacing:1px;color:#ffe9a8;text-shadow:2px 2px 0 var(--wood-rim)}
+.custDots{display:flex;gap:5px;justify-content:center}
+.custDot{width:7px;height:7px;border-radius:50%;background:rgba(90,60,20,.5);box-shadow:inset 0 0 0 1px var(--wood-rim)}
+.custDot.on{background:#ffe35b;box-shadow:0 0 6px rgba(255,227,91,.8)}
+/* page d'une catégorie : hauteur stable pour s'aligner sur l'aperçu de gauche */
+.customPage{display:flex;flex-direction:column;gap:13px;min-height:300px}
+.charNameRow{display:flex;align-items:center;gap:8px}
+.charNameRow label{font-size:9px;color:#5a3c14}
+.charNameRow input{flex:1;min-width:0;font-family:inherit;font-size:11px;color:#3a2c10;padding:8px 10px;
+ background:#f3e7c4;border:4px solid var(--wood-rim);box-shadow:inset 0 0 0 2px var(--parch-shadow);text-transform:uppercase}
+.charPreviewWrap{display:flex;justify-content:center;align-items:flex-end;padding:10px 14px;
+ background:linear-gradient(180deg,rgba(60,46,28,.35),rgba(30,22,12,.45));border:3px solid var(--wood-rim);border-radius:3px}
+.charPreviewWrap canvas{image-rendering:pixelated;width:120px;height:140px}
+.customGroup{display:flex;flex-direction:column;gap:5px}
+.customLabel{font-size:8px;color:#5a3c14;letter-spacing:1px}
+.swatchRow{display:flex;flex-wrap:wrap;gap:6px}
+.swatch{width:26px;height:26px;padding:0;border:3px solid var(--wood-rim);box-shadow:0 2px 0 var(--wood-rim);
+ cursor:pointer;animation:none;border-radius:2px}
+.swatch:hover{filter:brightness(1.12);transform:translateY(-1px)}.swatch.sel{outline:3px solid #ffe35b;box-shadow:0 0 8px rgba(255,227,91,.7)}
+.hatOpt{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:2px;
+ width:58px;height:46px;padding:4px;border:3px solid var(--wood-rim);box-shadow:0 2px 0 var(--wood-rim);
+ cursor:pointer;animation:none;border-radius:2px;color:#fff}
+.hatOpt small{font-size:6px;line-height:1.2;text-align:center;text-shadow:1px 1px #101b12}
+.hatOpt.sel{outline:3px solid #ffe35b}
+.hatOpt.premium{filter:grayscale(.5) brightness(.78)}
+.hatOpt .hatCost{position:absolute;top:2px;right:2px;display:flex;align-items:center;gap:1px;font-size:6px;
+ background:rgba(16,12,6,.8);padding:1px 3px;border-radius:2px;color:#ffd24a}
+.hatOpt .hatCost .rubisGem{width:8px;height:8px}
+
+@media(max-width:720px){
+ .skillTree{width:99%;padding:6px}
+ /* arbre horizontal : conserve sa taille pixel fixe, le conteneur défile horizontalement */
+ .rpgPanel{padding:10px}.rpgPanel>.rpgInner{padding:10px}
+ .rpgTab{font-size:12px;padding:6px 14px}
+ .charWrap2{flex-direction:column;align-items:center}
+ .charStage{width:96%;max-width:420px}
+ .charCustom{width:96%;max-width:420px}
+}

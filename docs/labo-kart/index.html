@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Labo Kart</title>
+<link rel="stylesheet" href="style.css?v=1"></head>
+<body><main id="shell">
+<canvas id="game" width="1280" height="720"></canvas>
+
+<!-- HUD course -->
+<div id="hud" class="hidden">
+  <div class="hudbox pos"><span id="posHud">1</span><small id="posTot">/5</small></div>
+  <div class="hudbox lap">TOUR <span id="lapHud" class="gold">1/3</span></div>
+  <div class="hudbox time"><span id="timeHud">0:00</span></div>
+  <div class="hudbox rank" id="rankHud"></div>
+  <div class="itemBox" id="itemBox"><div class="itemInner" id="itemInner"></div><small>ESPACE</small></div>
+  <div class="speedo"><div class="speedoBar" id="speedoBar"></div></div>
+</div>
+<div class="bigMsg hidden" id="bigMsg"></div>
+
+<button class="pauseToggle hidden" id="pauseToggle">II</button>
+<div class="pauseMenu hidden" id="pauseMenu"><div class="pausePanel"><h2>PAUSE</h2><button id="pResume">REPRENDRE</button><button id="pRestart">RECOMMENCER</button><button id="pTracks">CIRCUITS</button><button id="pSettings">REGLAGES</button><button id="pQuit">QUITTER</button></div></div>
+
+<!-- commandes tactiles : gauche/droite + accel + frein + item -->
+<div class="touchControls hidden" id="touchControls">
+  <button class="touchBtn dirBtn" id="leftBtn"><span>&#9664;</span></button>
+  <button class="touchBtn dirBtn" id="rightBtn"><span>&#9654;</span></button>
+  <button class="touchBtn brakeBtn" id="brakeBtn"><span>&#9660;</span><small>FREIN</small></button>
+  <button class="touchBtn itemBtnT" id="itemBtnT"><span>!</span><small>ITEM</small></button>
+  <button class="touchBtn accelBtn" id="accelBtn"><span>&#9650;</span><small>GAZ</small></button>
+</div>
+
+<!-- MENU -->
+<section class="screen" id="menu"><div class="menuPanel"><h1>LABO<br>KART</h1><div class="sub menuTag">Enfile ton casque et fonce&nbsp;! Pilote ton kart de labo sur des circuits de physique-chimie, double tes rivaux et d&eacute;croche les 3 &eacute;toiles.</div><div class="menuButtons"><button class="playBtn" id="mPlay">COURSE</button><button id="mHow">COMMENT JOUER</button><button id="mSettings">REGLAGES</button></div></div></section>
+
+<!-- SELECTION PERSONNAGE -->
+<section class="screen hidden" id="charSelect"><h1 style="font-size:34px">CHOISIS TON PILOTE</h1><div class="sub">Chaque pilote a son look&nbsp;: m&ecirc;mes performances, ton style&nbsp;!</div><div class="charGrid" id="charGrid"></div><button class="backBtn" id="csBack">&#9664; RETOUR</button></section>
+
+<!-- SELECTION CIRCUIT -->
+<section class="screen hidden" id="trackSelect"><h1 style="font-size:34px">CHOISIS TON CIRCUIT</h1><div class="sub">Chaque circuit a son th&egrave;me scientifique, ses pi&egrave;ges et ses raccourcis.</div><div class="trackGrid" id="trackGrid"></div><button class="backBtn" id="tsBack">&#9664; RETOUR</button></section>
+
+<!-- REGLAGES -->
+<section class="screen hidden" id="settings"><h1 style="font-size:34px">REGLAGES</h1><div class="panel" style="width:min(560px,95%)"><div class="settingRow">SECOUSSES DE CAMERA <button id="setShake"></button></div><div class="settingRow">EFFETS SONORES <button id="setSound"></button></div><div class="settingRow">MUSIQUE <button id="setMusic"></button></div><div class="settingRow">COMMANDES TACTILES <button id="setTouch"></button></div><div class="settingRow">DIFFICULTE IA <button id="setDiff"></button></div></div><button class="backBtn" id="setBack">&#9664; RETOUR</button></section>
+
+<!-- COMMENT JOUER -->
+<section class="screen hidden" id="how"><div class="panel sub" style="max-width:640px;text-align:left"><h2 style="color:#ffe35b">PILOTAGE</h2>FLECHES / ZQSD : tourner, acc&eacute;l&eacute;rer, freiner.<br>ESPACE / X : utiliser ton bonus.<br>MAJ : d&eacute;raper dans les virages pour gagner un mini-boost.<br><br><h2 style="color:#ffe35b">SCIENCE = VITESSE</h2>Les batteries donnent un boost, les zones conductrices acc&eacute;l&egrave;rent, mais les flaques acides ralentissent et les courts-circuits coupent ton boost. Roule sur les <b>box bonus</b> pour piocher un objet&nbsp;!<br><br>Finis la course pour 1 &eacute;toile, le top 3 pour 2 &eacute;toiles, premier sans casse pour 3 &eacute;toiles.</div><button id="howOk">COMPRIS</button></section>
+
+<!-- RESULTAT -->
+<section class="screen hidden" id="result"><div class="panel result" id="resultBox"></div><div class="dashBtns"><button id="rTracks">AUTRE CIRCUIT</button><button id="rReplay">REJOUER</button></div></section>
+</main>
+<script src="data/tracks.js?v=1"></script>
+<script src="engine.js?v=1"></script>
+</body></html>

@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Accueil — Animations Physique-Chimie, cours interactifs et jeux éducatifs">
+    <meta name="theme-color" content="#F2F2F7">
+    <title>Accueil — Animations Physique-Chimie</title>
+    <style>
+/* ====================================================================
+   ACCUEIL — DA alignée sur les pages Sciences / Jeux
+   ==================================================================== */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+    --glass-bg: rgba(255,255,255,0.62);
+    --glass-bg-heavy: rgba(255,255,255,0.78);
+    --glass-border: rgba(255,255,255,0.45);
+    --glass-shadow: 0 2px 20px rgba(0,0,0,0.06),0 0 0 .5px rgba(0,0,0,0.05);
+    --glass-shadow-hover: 0 8px 32px rgba(0,0,0,0.10),0 0 0 .5px rgba(0,0,0,0.06);
+    --blur: blur(28px) saturate(180%);
+    --r-sm:10px;--r-md:14px;--r-lg:20px;--r-xl:24px;
+    --blue:#4dabf7;--green:#34C759;--orange:#FF9500;--red:#FF3B30;
+    --purple:#AF52DE;--pink:#FF2D55;--yellow:#FFCC00;--teal:#5AC8FA;
+    --indigo:#5856D6;--cyan:#32ADE6;--mint:#00C7BE;
+    --txt1:#1C1C1E;--txt2:#8E8E93;--txt3:#AEAEB2;
+    --fill1:rgba(120,120,128,0.2);--fill2:rgba(120,120,128,0.12);--fill3:rgba(120,120,128,0.08);
+    --sep:rgba(60,60,67,0.08);--bg1:#F2F2F7;--bg2:#FFFFFF;
+    --glass-white: rgba(255, 255, 255, 0.72);
+    --glass-frost: rgba(250, 252, 255, 0.85);
+    --accent-gradient: linear-gradient(125deg, rgba(21,83,183,.95), rgba(0,122,255,.86), rgba(96,145,255,.72));
+    --home-bg: radial-gradient(ellipse at 18% 18%, rgba(10,132,255,0.10) 0%, transparent 46%),
+               radial-gradient(ellipse at 78% 20%, rgba(175,82,222,0.07) 0%, transparent 44%),
+               radial-gradient(ellipse at 82% 78%, rgba(52,199,89,0.08) 0%, transparent 46%),
+               radial-gradient(ellipse at 46% 54%, rgba(50,173,230,0.05) 0%, transparent 58%);
+}
+
+html { scroll-behavior: smooth; }
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg1);
+    min-height: 100vh;
+    color: var(--txt1);
+    -webkit-font-smoothing: antialiased;
+    position: relative;
+    z-index: 1;
+    color-scheme: light;
+    overflow-x: hidden;
+}
+body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background: var(--home-bg);
+    pointer-events: none;
+    z-index: 0;
+    animation: ambientDrift 24s ease-in-out infinite alternate;
+}
+body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.12;
+    background-image:
+        radial-gradient(circle at 1px 1px, rgba(255,255,255,0.52) 0.6px, transparent 0.8px),
+        radial-gradient(circle at 1px 1px, rgba(15,23,42,0.20) 0.55px, transparent 0.85px);
+    background-size: 3px 3px, 5px 5px;
+    mix-blend-mode: soft-light;
+}
+@keyframes ambientDrift {
+    from { transform: translate3d(0,0,0) scale(1); filter: saturate(102%); }
+    to { transform: translate3d(0,-1.2%,0) scale(1.03); filter: saturate(108%); }
+}
+
+/* ====================================================================
+   SIDEBAR — même esprit que les autres pages
+   ==================================================================== */
+#sidebar {
+    position: fixed; left: 0; top: 0; bottom: 0;
+    width: 260px;
+    background: rgba(255,255,255,0.82);
+    backdrop-filter: blur(40px) saturate(200%);
+    -webkit-backdrop-filter: blur(40px) saturate(200%);
+    border-right: 0.5px solid rgba(255,255,255,0.5);
+    box-shadow: 4px 0 40px rgba(0,0,0,0.06), 1px 0 0 rgba(0,0,0,0.03);
+    display: flex; flex-direction: column;
+    overflow-y: auto;
+    padding: 16px 12px 24px;
+    z-index: 200;
+    transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+    isolation: isolate;
+}
+#sidebar::before {
+    content: '';
+    position: absolute; inset: 0;
+    pointer-events: none;
+    border-radius: inherit;
+    background: linear-gradient(145deg, rgba(255,255,255,0.78) 0%, rgba(255,255,255,0.28) 40%, rgba(255,255,255,0.10) 64%, rgba(255,255,255,0.34) 100%);
+    opacity: 0.58;
+    z-index: 0;
+}
+#sidebar > * { position: relative; z-index: 1; }
+.sidebar-header {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 8px 14px 18px;
+    border-bottom: 0.5px solid var(--sep);
+    margin-bottom: 12px;
+}
+.sidebar-logo { font-size: 1.6rem; display: inline-flex; align-items: center; color: #0A84FF; }
+.sidebar-logo svg { display: block; }
+.sidebar-brand { min-width: 0; flex: 1; }
+.sidebar-title { font-size: 0.95rem; font-weight: 800; color: var(--txt1); letter-spacing: -0.3px; }
+.sidebar-subtitle { font-size: 0.72rem; color: var(--txt3); font-weight: 500; }
+.sidebar-header-actions { display: flex; align-items: center; gap: 6px; margin-left: auto; }
+.sidebar-toggle {
+    display: none; align-items: center; justify-content: center;
+    width: 36px; height: 36px;
+    border: 1px solid rgba(255,255,255,0.52);
+    border-radius: 999px;
+    background: linear-gradient(145deg, rgba(255,255,255,0.58), rgba(255,255,255,0.24));
+    box-shadow: 0 8px 18px rgba(15,23,42,0.08), inset 0 1px 0 rgba(255,255,255,0.72);
+    font-size: 1rem; cursor: pointer; color: var(--txt1);
+}
+.sidebar-nav { display: flex; flex-direction: column; gap: 1px; }
+.sidebar-section { margin-bottom: 8px; }
+.sidebar-section-label {
+    font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.8px; color: var(--txt3); padding: 16px 14px 6px;
+}
+.sidebar-btn {
+    display: flex; align-items: center; gap: 10px;
+    width: 100%; padding: 11px 14px;
+    border: 1px solid transparent; border-radius: 10px;
+    background: transparent; color: var(--txt2);
+    font-family: inherit; font-size: 0.84rem; font-weight: 650;
+    cursor: pointer; text-decoration: none;
+    transition: all 0.2s cubic-bezier(0.32, 0.72, 0, 1);
+    text-align: left; position: relative;
+}
+.sidebar-btn::before {
+    content: ''; position: absolute; inset: 0; border-radius: inherit;
+    background: linear-gradient(135deg, rgba(10,132,255,0.14), rgba(90,200,250,0.10));
+    opacity: 0; transition: opacity 0.2s ease;
+}
+.sidebar-btn > * { position: relative; z-index: 1; }
+.sidebar-btn:hover { color: var(--txt1); transform: translateX(2px); }
+.sidebar-btn:hover::before { opacity: 0.62; }
+.sidebar-btn.active {
+    color: #0A63E6;
+    background: rgba(10,132,255,0.13);
+    border-color: rgba(10,132,255,0.16);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.72), 0 8px 18px rgba(10,132,255,0.07);
+}
+.sidebar-icon { width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.sidebar-label { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sidebar-tag {
+    font-size: 0.62rem; font-weight: 800; padding: 3px 7px; border-radius: 999px;
+    color: #0A63E6; background: rgba(10,132,255,0.13);
+}
+.sidebar-tag.green { color: #0a7d4b; background: rgba(52,199,89,0.16); }
+.sidebar-tag.orange { color: #b25400; background: rgba(255,149,0,0.16); }
+#sidebarBackdrop {
+    position: fixed; inset: 0;
+    background: rgba(20,24,34,0.16);
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.25s ease;
+    z-index: 150;
+}
+body.sidebar-open #sidebarBackdrop { opacity: 1; pointer-events: auto; }
+
+/* ====================================================================
+   MAIN LAYOUT
+   ==================================================================== */
+#app-content {
+    margin-left: 260px;
+    min-height: 100vh;
+    padding: 24px;
+    position: relative;
+    z-index: 1;
+}
+.container { max-width: 1180px; margin: 0 auto; }
+.topbar-mobile { display: none; }
+
+.glass-card, .hero-card, .level-card, .game-mini-card, .mini-panel {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+    background: var(--glass-bg-heavy);
+    backdrop-filter: var(--blur);
+    -webkit-backdrop-filter: var(--blur);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--r-xl);
+    box-shadow: var(--glass-shadow);
+}
+.glass-card::before, .hero-card::before, .level-card::before, .game-mini-card::before, .mini-panel::before {
+    content: '';
+    position: absolute; inset: 0;
+    pointer-events: none;
+    border-radius: inherit;
+    background: linear-gradient(145deg, rgba(255,255,255,0.74) 0%, rgba(255,255,255,0.28) 42%, rgba(255,255,255,0.08) 64%, rgba(255,255,255,0.28) 100%);
+    opacity: 0.64;
+    z-index: 0;
+}
+.glass-card > *, .hero-card > *, .level-card > *, .game-mini-card > *, .mini-panel > * { position: relative; z-index: 1; }
+
+.hero-card {
+    min-height: 520px;
+    padding: clamp(24px, 5vw, 58px);
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr);
+    gap: clamp(20px, 4vw, 56px);
+    align-items: center;
+    margin-bottom: 22px;
+}
+.hero-kicker {
+    display: inline-flex; align-items: center; gap: 8px;
+    width: fit-content;
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: rgba(10,132,255,0.10);
+    color: #0A63E6;
+    border: 1px solid rgba(10,132,255,0.14);
+    font-size: 0.78rem;
+    font-weight: 900;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-bottom: 18px;
+}
+.hero-title {
+    font-size: clamp(2.5rem, 7vw, 5.8rem);
+    line-height: 0.88;
+    letter-spacing: -0.078em;
+    font-weight: 900;
+    margin-bottom: 22px;
+}
+.hero-title span {
+    background: var(--accent-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+.hero-subtitle {
+    max-width: 650px;
+    color: #607684;
+    font-size: clamp(1rem, 1.7vw, 1.18rem);
+    line-height: 1.62;
+    font-weight: 640;
+    margin-bottom: 26px;
+}
+.hero-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    min-height: 46px; padding: 12px 18px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.58);
+    font-family: inherit;
+    font-size: 0.92rem;
+    font-weight: 850;
+    text-decoration: none;
+    cursor: pointer;
+    color: var(--txt1);
+    background: rgba(255,255,255,0.62);
+    box-shadow: 0 10px 22px rgba(15,23,42,0.06), inset 0 1px 0 rgba(255,255,255,0.82);
+    transition: transform .2s ease, box-shadow .2s ease, filter .2s ease;
+}
+.btn:hover { transform: translateY(-2px); box-shadow: 0 16px 30px rgba(15,23,42,0.10), inset 0 1px 0 rgba(255,255,255,0.88); }
+.btn.primary { color: white; background: linear-gradient(135deg, #0A84FF, #32ADE6); border-color: rgba(255,255,255,0.42); }
+.btn.green { color: white; background: linear-gradient(135deg, #0FBf76, #34C759); border-color: rgba(255,255,255,0.42); }
+
+/* Hero visual */
+.hero-visual {
+    min-height: 390px;
+    position: relative;
+    border-radius: 34px;
+    background: linear-gradient(180deg, rgba(251,253,255,0.95), rgba(240,245,251,0.92));
+    border: 1px solid rgba(255,255,255,0.58);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.86), 0 24px 54px rgba(15,23,42,0.10);
+    overflow: hidden;
+}
+.hero-visual::before {
+    content: '';
+    position: absolute; inset: -30%;
+    background:
+        radial-gradient(circle at 28% 28%, rgba(77,171,247,0.36), transparent 18%),
+        radial-gradient(circle at 75% 70%, rgba(52,199,89,0.22), transparent 17%),
+        radial-gradient(circle at 72% 22%, rgba(255,149,0,0.22), transparent 16%),
+        radial-gradient(circle at 36% 75%, rgba(175,82,222,0.20), transparent 15%);
+    filter: blur(2px);
+}
+.orbit {
+    position: absolute;
+    left: 50%; top: 48%;
+    width: 260px; height: 260px;
+    transform: translate(-50%, -50%);
+    border: 1.5px solid rgba(10,132,255,0.18);
+    border-radius: 50%;
+    animation: spin 16s linear infinite;
+}
+.orbit:nth-child(2) { width: 310px; height: 160px; animation-duration: 20s; transform: translate(-50%, -50%) rotate(24deg); }
+.orbit:nth-child(3) { width: 160px; height: 310px; animation-duration: 18s; transform: translate(-50%, -50%) rotate(-18deg); }
+@keyframes spin { to { rotate: 360deg; } }
+.nucleus {
+    position: absolute;
+    left: 50%; top: 48%;
+    transform: translate(-50%, -50%);
+    width: 96px; height: 96px;
+    border-radius: 32px;
+    display: grid; place-items: center;
+    color: white;
+    background: linear-gradient(135deg, #0A84FF, #32ADE6);
+    box-shadow: 0 22px 60px rgba(10,132,255,0.26), inset 0 1px 0 rgba(255,255,255,0.38);
+}
+.bubble {
+    position: absolute;
+    width: 14px; height: 14px;
+    border-radius: 999px;
+    background: white;
+    box-shadow: 0 0 0 7px rgba(255,255,255,0.24), 0 10px 25px rgba(15,23,42,0.12);
+}
+.bubble.b1 { left: 22%; top: 21%; background: #4dabf7; }
+.bubble.b2 { right: 22%; top: 29%; background: #FF9500; }
+.bubble.b3 { left: 26%; bottom: 25%; background: #AF52DE; }
+.bubble.b4 { right: 20%; bottom: 22%; background: #34C759; }
+.lab-window {
+    position: absolute;
+    left: 30px; right: 30px; bottom: 28px;
+    min-height: 98px;
+    border-radius: 24px;
+    background: rgba(255,255,255,0.72);
+    border: 1px solid rgba(255,255,255,0.66);
+    backdrop-filter: blur(18px) saturate(160%);
+    box-shadow: 0 12px 30px rgba(15,23,42,0.08), inset 0 1px 0 rgba(255,255,255,0.86);
+    padding: 16px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+.lab-stat {
+    border-radius: 16px;
+    background: rgba(120,120,128,0.08);
+    padding: 12px;
+    display: flex; flex-direction: column; justify-content: center;
+    gap: 4px;
+}
+.lab-stat strong { font-size: 1.18rem; letter-spacing: -0.04em; }
+.lab-stat span { font-size: .68rem; color: var(--txt2); font-weight: 800; text-transform: uppercase; letter-spacing: .04em; }
+
+.section-title-row {
+    display: flex; align-items: end; justify-content: space-between;
+    gap: 18px;
+    margin: 34px 0 14px;
+}
+.section-kicker { color: #0A63E6; font-size: 0.76rem; font-weight: 900; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 7px; }
+.section-title { font-size: clamp(1.6rem, 3vw, 2.3rem); letter-spacing: -.055em; line-height: 1; }
+.section-note { color: #607684; font-size: .9rem; font-weight: 650; max-width: 440px; line-height: 1.45; }
+
+.level-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.level-card {
+    min-height: 260px;
+    padding: 22px;
+    text-decoration: none;
+    color: inherit;
+    display: flex; flex-direction: column;
+    transition: transform .22s ease, box-shadow .22s ease;
+}
+.level-card:hover { transform: translateY(-4px); box-shadow: var(--glass-shadow-hover); }
+.level-card.featured { grid-column: span 1; }
+.level-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.level-icon {
+    width: 54px; height: 54px;
+    border-radius: 18px;
+    display: grid; place-items: center;
+    color: white;
+    box-shadow: 0 14px 26px rgba(15,23,42,0.12), inset 0 1px 0 rgba(255,255,255,0.35);
+}
+.level-badge {
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: .68rem;
+    font-weight: 900;
+    background: rgba(120,120,128,0.10);
+    color: var(--txt2);
+}
+.level-card h2 { font-size: 1.55rem; letter-spacing: -.05em; margin-bottom: 10px; }
+.level-card p { color: #607684; line-height: 1.48; font-size: .92rem; font-weight: 640; margin-bottom: 18px; }
+.chip-row { display: flex; flex-wrap: wrap; gap: 7px; margin-top: auto; }
+.chip {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 7px 9px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.52);
+    border: 1px solid rgba(255,255,255,0.58);
+    color: #526070;
+    font-size: .72rem;
+    font-weight: 850;
+}
+.level-5e .level-icon { background: linear-gradient(135deg, #4dabf7, #5AC8FA); }
+.level-4e .level-icon { background: linear-gradient(135deg, #AF52DE, #5856D6); }
+.level-3e .level-icon { background: linear-gradient(135deg, #FF9500, #FFCC00); }
+
+.games-strip { display: grid; grid-template-columns: 1.1fr repeat(2, minmax(0, .95fr)); gap: 16px; margin-bottom: 40px; }
+.game-mini-card {
+    min-height: 210px;
+    padding: 20px;
+    color: inherit;
+    text-decoration: none;
+    transition: transform .22s ease, box-shadow .22s ease;
+}
+.game-mini-card:hover { transform: translateY(-4px); box-shadow: var(--glass-shadow-hover); }
+.game-mini-card.main-game { min-height: 260px; background: linear-gradient(145deg, rgba(255,255,255,0.82), rgba(232,244,255,0.82)); }
+.game-art {
+    height: 96px;
+    border-radius: 20px;
+    margin-bottom: 16px;
+    background: linear-gradient(180deg, #2a1a4a, #4a2c6e);
+    border: 1px solid rgba(255,255,255,0.38);
+    overflow: hidden;
+    display: grid; place-items: center;
+}
+.game-mini-card:nth-child(2) .game-art { background: linear-gradient(180deg, #0e2a26, #134b40); }
+.game-mini-card:nth-child(3) .game-art { background: linear-gradient(180deg, #1a2a1c, #2a4a30); }
+.pixel-row { display: grid; grid-template-columns: repeat(10, 12px); grid-auto-rows: 12px; gap: 2px; transform: rotate(-3deg); }
+.px { border-radius: 2px; background: rgba(255,255,255,0.25); }
+.px.a { background: #ffe08a; } .px.b { background: #4dabf7; } .px.c { background: #34C759; } .px.d { background: #FF9500; } .px.e { background: #AF52DE; }
+.game-mini-card h3 { font-size: 1.22rem; letter-spacing: -.035em; margin-bottom: 8px; }
+.game-mini-card p { color: #607684; line-height: 1.45; font-size: .86rem; font-weight: 640; }
+
+.info-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin: 18px 0 26px; }
+.mini-panel { padding: 18px; min-height: 130px; }
+.mini-panel h3 { font-size: 1rem; letter-spacing: -.03em; margin: 0 0 8px; display: flex; align-items: center; gap: 8px; }
+.mini-panel p { color: #607684; line-height: 1.42; font-size: .84rem; font-weight: 640; }
+.footer-note { color: var(--txt3); font-size: .78rem; font-weight: 650; text-align: center; padding: 12px 0 28px; }
+
+@media (max-width: 1060px) {
+    .hero-card { grid-template-columns: 1fr; }
+    .hero-visual { min-height: 330px; }
+    .games-strip { grid-template-columns: 1fr; }
+}
+@media (max-width: 860px) {
+    #sidebar {
+        width: min(320px, 88vw);
+        transform: translateX(-105%);
+        box-shadow: 10px 0 40px rgba(0,0,0,0.12);
+    }
+    body.sidebar-open #sidebar { transform: translateX(0); }
+    .sidebar-toggle { display: inline-flex; }
+    #app-content { margin-left: 0; padding: 14px; padding-top: 74px; }
+    .topbar-mobile {
+        display: flex; align-items: center; justify-content: space-between;
+        position: fixed; top: 12px; left: 12px; right: 12px;
+        z-index: 140;
+        padding: 9px 10px 9px 14px;
+        border-radius: 999px;
+        background: rgba(255,255,255,0.78);
+        backdrop-filter: blur(26px) saturate(180%);
+        -webkit-backdrop-filter: blur(26px) saturate(180%);
+        border: 1px solid rgba(255,255,255,0.56);
+        box-shadow: 0 10px 28px rgba(15,23,42,0.08), inset 0 1px 0 rgba(255,255,255,0.72);
+        color: var(--txt1);
+        font-size: .84rem;
+        font-weight: 850;
+    }
+    .mobile-menu-btn {
+        width: 38px; height: 38px; border-radius: 999px;
+        border: 1px solid rgba(255,255,255,0.6);
+        background: rgba(255,255,255,0.62);
+        color: var(--txt1);
+        display: inline-grid; place-items: center;
+    }
+    .level-grid, .info-grid { grid-template-columns: 1fr; }
+    .section-title-row { align-items: start; flex-direction: column; }
+}
+@media (max-width: 560px) {
+    .hero-card { padding: 22px; min-height: auto; }
+    .hero-title { font-size: clamp(2.25rem, 14vw, 3.5rem); }
+    .hero-actions { flex-direction: column; }
+    .btn { width: 100%; }
+    .hero-visual { min-height: 280px; border-radius: 26px; }
+    .lab-window { left: 16px; right: 16px; bottom: 16px; grid-template-columns: 1fr; }
+    .orbit { transform: translate(-50%, -62%); }
+    .level-card { min-height: 230px; }
+}
+    </style>
+</head>
+<body>
+    <div id="sidebarBackdrop" aria-hidden="true"></div>
+
+    <aside id="sidebar" aria-label="Navigation principale">
+        <div class="sidebar-header">
+            <span class="sidebar-logo"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="1.6"/><ellipse cx="12" cy="12" rx="9.4" ry="3.8"/><ellipse cx="12" cy="12" rx="9.4" ry="3.8" transform="rotate(62 12 12)"/><ellipse cx="12" cy="12" rx="9.4" ry="3.8" transform="rotate(124 12 12)"/></svg></span>
+            <div class="sidebar-brand">
+                <div class="sidebar-title">Animations Physique-Chimie</div>
+                <div class="sidebar-subtitle">M.Boulahrouf — Accueil</div>
+            </div>
+            <div class="sidebar-header-actions">
+                <button class="sidebar-toggle" id="sidebarToggle" aria-label="Fermer le menu"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <div class="sidebar-section">
+                <div class="sidebar-section-label">Espace</div>
+                <a class="sidebar-btn active" href="index.html">
+                    <span class="sidebar-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10.5V20h14v-9.5"/><path d="M9 20v-6h6v6"/></svg></span>
+                    <span class="sidebar-label">Accueil</span>
+                    <span class="sidebar-tag">Hub</span>
+                </a>
+                <a class="sidebar-btn" href="sciences-5eme.html">
+                    <span class="sidebar-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c3.4 4.4 6.3 7.7 6.3 10.9a6.3 6.3 0 0 1-12.6 0C5.7 10.7 8.6 7.4 12 3z"/></svg></span>
+                    <span class="sidebar-label">Cours 5ème</span>
+                </a>
+                <a class="sidebar-btn" href="sciences-4eme.html">
+                    <span class="sidebar-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3v6.2l-5 8.7A2 2 0 0 0 6.7 21h10.6a2 2 0 0 0 1.7-3.1l-5-8.7V3"/><path d="M8.5 3h7M7.6 15.5h8.8"/></svg></span>
+                    <span class="sidebar-label">Cours 4ème</span>
+                </a>
+                <div class="sidebar-btn sidebar-locked" aria-disabled="true" title="Espace 3ème en Alpha : accès désactivé pour le moment">
+                    <span class="sidebar-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 3 5.5 13.5h4.5L9 21l7.5-10.5H12L13 3z"/></svg></span>
+                    <span class="sidebar-label">Cours 3ème</span>
+                    <span class="sidebar-tag orange">Alpha</span>
+                </div>
+                <a class="sidebar-btn" href="sciences-jeux.html">
+                    <span class="sidebar-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 14h10l1.6 4.2a2.2 2.2 0 0 1-2.1 3H7.5a2.2 2.2 0 0 1-2.1-3L7 14z"/><path d="M9 14V4h6v10"/><path d="M10 8h4"/></svg></span>
+                    <span class="sidebar-label">Jeux</span>
+                    <span class="sidebar-tag green">Bêta</span>
+                </a>
+            </div>
+            <div class="sidebar-section">
+                <div class="sidebar-section-label">Jeux rapides</div>
+                <a class="sidebar-btn" href="temple-quiz-pixel/index.html"><span class="sidebar-icon">🏛️</span><span class="sidebar-label">Temple du savoir</span></a>
+                <a class="sidebar-btn" href="panique-au-labo-pixel/index.html"><span class="sidebar-icon">🧪</span><span class="sidebar-label">Panique au Labo</span></a>
+                <a class="sidebar-btn" href="labs-up/index.html"><span class="sidebar-icon">🃏</span><span class="sidebar-label">Labs'Up</span></a>
+                <a class="sidebar-btn" href="labo-kart/index.html"><span class="sidebar-icon">🏎️</span><span class="sidebar-label">Labo Kart</span></a>
+            </div>
+        </nav>
+    </aside>
+
+    <div class="topbar-mobile">
+        <span>Animations Physique-Chimie</span>
+        <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Ouvrir le menu"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h16"/></svg></button>
+    </div>
+
+    <main id="app-content">
+        <div class="container">
+            <section class="hero-card" aria-label="Accueil du site">
+                <div class="hero-copy">
+                    <div class="hero-kicker">⚗️ Cours interactifs · Collège</div>
+                    <h1 class="hero-title">Physique-<br><span>Chimie</span></h1>
+                    <p class="hero-subtitle">Un espace clair pour retrouver les chapitres, manipuler les animations et lancer les jeux de révision. Même univers visuel que les pages de cours : liquid glass, cartes interactives et ambiance labo numérique.</p>
+                    <div class="hero-actions">
+                        <a class="btn primary" href="sciences-5eme.html"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>Commencer en 5ème</a>
+                        <a class="btn green" href="sciences-jeux.html"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Voir les jeux</a>
+                    </div>
+                </div>
+                <div class="hero-visual" aria-hidden="true">
+                    <div class="orbit"></div>
+                    <div class="orbit"></div>
+                    <div class="orbit"></div>
+                    <div class="nucleus"><svg viewBox="0 0 24 24" width="46" height="46" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1.6"/><ellipse cx="12" cy="12" rx="8.6" ry="3.4"/><ellipse cx="12" cy="12" rx="8.6" ry="3.4" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="8.6" ry="3.4" transform="rotate(120 12 12)"/></svg></div>
+                    <span class="bubble b1"></span><span class="bubble b2"></span><span class="bubble b3"></span><span class="bubble b4"></span>
+                    <div class="lab-window">
+                        <div class="lab-stat"><strong>5e</strong><span>matière · énergie</span></div>
+                        <div class="lab-stat"><strong>4e</strong><span>chimie · signaux</span></div>
+                        <div class="lab-stat"><strong>Jeux</strong><span>quiz · défis</span></div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="cours" aria-label="Accès aux cours">
+                <div class="section-title-row">
+                    <div>
+                        <div class="section-kicker">Chapitres</div>
+                        <h2 class="section-title">Choisir un niveau</h2>
+                    </div>
+                    <p class="section-note">Chaque page garde le menu latéral, les cartes de chapitre et les animations intégrées.</p>
+                </div>
+
+                <div class="level-grid">
+                    <a class="level-card level-5e" href="sciences-5eme.html">
+                        <div class="level-top">
+                            <div class="level-icon"><svg viewBox="0 0 24 24" width="27" height="27" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c3.4 4.4 6.3 7.7 6.3 10.9a6.3 6.3 0 0 1-12.6 0C5.7 10.7 8.6 7.4 12 3z"/></svg></div>
+                            <span class="level-badge">Disponible</span>
+                        </div>
+                        <h2>Sciences 5ème</h2>
+                        <p>L’eau, masse et volume, changements d’état, mélanges, énergie, électricité, son, lumière et Univers.</p>
+                        <div class="chip-row"><span class="chip">🧪 Chimie</span><span class="chip">⚡ Physique</span><span class="chip">🌌 Univers</span></div>
+                    </a>
+
+                    <a class="level-card level-4e" href="sciences-4eme.html">
+                        <div class="level-top">
+                            <div class="level-icon"><svg viewBox="0 0 24 24" width="27" height="27" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3v6.2l-5 8.7A2 2 0 0 0 6.7 21h10.6a2 2 0 0 0 1.7-3.1l-5-8.7V3"/><path d="M8.5 3h7M7.6 15.5h8.8"/></svg></div>
+                            <span class="level-badge">Disponible</span>
+                        </div>
+                        <h2>Sciences 4ème</h2>
+                        <p>Des chapitres interactifs pour consolider les manipulations, les raisonnements et les notions clés.</p>
+                        <div class="chip-row"><span class="chip">🔬 Activités</span><span class="chip">📈 Simulations</span><span class="chip">⭐ Scores</span></div>
+                    </a>
+
+                    <article class="level-card level-3e is-locked" aria-disabled="true" title="Espace 3ème en Alpha : accès désactivé pour le moment">
+                        <div class="level-top">
+                            <div class="level-icon"><svg viewBox="0 0 24 24" width="27" height="27" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 3 5.5 13.5h4.5L9 21l7.5-10.5H12L13 3z"/></svg></div>
+                            <span class="level-badge">Alpha</span>
+                        </div>
+                        <h2>Sciences 3ème</h2>
+                        <p>Espace verrouillé pour le moment : la partie 3ème est en version Alpha et sera ouverte plus tard.</p>
+                        <div class="chip-row"><span class="chip">🔒 Verrouillé</span><span class="chip">🧪 Alpha</span></div>
+                    </article>
+                </div>
+            </section>
+
+            <section id="jeux" aria-label="Accès aux jeux">
+                <div class="section-title-row">
+                    <div>
+                        <div class="section-kicker">Jeux éducatifs</div>
+                        <h2 class="section-title">Réviser autrement</h2>
+                    </div>
+                    <p class="section-note">Accès direct aux prototypes et à la page jeux complète.</p>
+                </div>
+
+                <div class="games-strip">
+                    <a class="game-mini-card main-game" href="sciences-jeux.html">
+                        <div class="game-art">
+                            <div class="pixel-row">
+                                <i class="px a"></i><i class="px"></i><i class="px b"></i><i class="px"></i><i class="px e"></i><i class="px"></i><i class="px c"></i><i class="px"></i><i class="px d"></i><i class="px"></i>
+                                <i class="px"></i><i class="px a"></i><i class="px a"></i><i class="px b"></i><i class="px"></i><i class="px e"></i><i class="px c"></i><i class="px c"></i><i class="px"></i><i class="px d"></i>
+                                <i class="px b"></i><i class="px b"></i><i class="px"></i><i class="px"></i><i class="px a"></i><i class="px e"></i><i class="px"></i><i class="px c"></i><i class="px d"></i><i class="px d"></i>
+                            </div>
+                        </div>
+                        <h3>Page jeux complète</h3>
+                        <p>Le hub de tous les jeux : Temple du savoir, Panique au Labo, Labo Kart et Labs'Up.</p>
+                    </a>
+                    <a class="game-mini-card" href="temple-quiz-pixel/index.html">
+                        <div class="game-art"><strong style="color:#ffe08a;font-size:2.3rem;letter-spacing:-.08em;">🏛️</strong></div>
+                        <h3>Temple du savoir</h3>
+                        <p>Un parcours de quiz en pixel art pour réviser les notions.</p>
+                    </a>
+                    <a class="game-mini-card" href="panique-au-labo-pixel/index.html">
+                        <div class="game-art"><strong style="color:#bfffe9;font-size:2.3rem;letter-spacing:-.08em;">🧪</strong></div>
+                        <h3>Panique au Labo</h3>
+                        <p>Des réflexes de laboratoire, des manipulations et des imprévus.</p>
+                    </a>
+                </div>
+            </section>
+
+            <section class="info-grid" aria-label="Informations rapides">
+                <div class="mini-panel"><h3>✨ Même DA</h3><p>Cartes arrondies, effet verre, reflets, gradients doux et menu latéral cohérent avec les pages existantes.</p></div>
+                <div class="mini-panel"><h3>🔗 Liens propres</h3><p>Les pages principales et les alias courts restent disponibles pour GitHub Pages.</p></div>
+                <div class="mini-panel"><h3>📱 Responsive</h3><p>La page d’accueil s’adapte au téléphone avec un menu mobile et des cartes empilées.</p></div>
+            </section>
+
+            <div class="footer-note">Site prêt pour une publication GitHub Pages depuis le dossier <strong>/docs</strong>.</div>
+        </div>
+    </main>
+
+    <script>
+        const body = document.body;
+        const sidebarBackdrop = document.getElementById('sidebarBackdrop');
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        function openSidebar(){ body.classList.add('sidebar-open'); }
+        function closeSidebar(){ body.classList.remove('sidebar-open'); }
+        mobileMenuBtn?.addEventListener('click', openSidebar);
+        sidebarToggle?.addEventListener('click', closeSidebar);
+        sidebarBackdrop?.addEventListener('click', closeSidebar);
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') closeSidebar();
+        });
+    </script>
+</body>
+</html>
