@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Labs'Up</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body><main id="shell">
+<div id="bgDots"></div><div id="vignette"></div>
+
+<!-- MENU -->
+<section class="screen" id="menu"><div class="menuPanel"><h1>LABS'UP</h1>
+<div class="sub menuTag">Révise la physique-chimie en éclair. Reconnais les notions à partir d'une définition, d'un mot-clé ou d'une image, et clique la bonne réponse !</div>
+<div class="menuButtons">
+<button class="playBtn" onclick="goClass()">JOUER</button>
+<button onclick="showHow()">COMMENT JOUER</button>
+</div></div></section>
+
+<!-- COMMENT JOUER -->
+<section class="screen hidden" id="how"><div class="panel sub"><h2>COMMENT JOUER</h2>
+Choisis ta classe puis suis le <b>parcours</b> : réussis un chapitre pour débloquer le suivant.<br><br>
+Une carte apparaît avec un indice. Clique la bonne réponse parmi 4 propositions.<br><br>
+Esprit <b>Time's Up</b> : 3 types d'indices, du plus simple au plus dur —
+<b>définition</b> · <b>mot-clé</b> · <b>image</b>.<br><br>
+Choisis ta <b>difficulté</b> : <b>Facile</b> (surtout des définitions, sans chrono),
+<b>Moyen</b> (chrono), <b>Difficile</b> (surtout des images, chrono serré).<br><br>
+À la fin : score, badge du labo, et le chapitre suivant se débloque dès 50% de réussite.</div>
+<button onclick="showMenu()">COMPRIS</button></section>
+
+<!-- CHOIX CLASSE -->
+<section class="screen hidden" id="classSelect"><h1 style="font-size:34px">CHOISIS TA CLASSE</h1>
+<div class="sub">Chaque classe a ses propres thèmes de révision.</div>
+<div class="levelCards">
+<button class="levelCard" onclick="chooseClass('5e')"><b>5ᵉ</b><small>Verrerie, masse & volume, états, mélanges,<br>électricité, énergies, son & lumière</small></button>
+<button class="levelCard" onclick="chooseClass('4e')"><b>4ᵉ</b><small>Atomes, transformations, combustions,<br>masse volumique, vitesse, circuits, énergie</small></button>
+</div>
+<button onclick="showMenu()">RETOUR</button></section>
+
+<!-- CARTE DE PROGRESSION (bracket) -->
+<section class="screen hidden" id="themeSelect">
+<h1 style="font-size:28px" id="themeTitle">PARCOURS</h1>
+<div class="sub mapHint">Réussis un chapitre pour débloquer le suivant.</div>
+<div class="mapWrap"><div class="mapPath" id="themeList"></div></div>
+<button onclick="goClass()">RETOUR</button></section>
+
+<!-- CHOIX DIFFICULTÉ -->
+<section class="screen hidden" id="modeSelect"><h1 style="font-size:30px">DIFFICULTÉ</h1>
+<div class="sub" id="modeSub"></div>
+<div class="menuButtons" id="modeButtons">
+<button class="diffBtn" onclick="chooseMode('facile')"><span class="diffName">FACILE</span><small>Surtout définitions · sans chrono · partie courte</small></button>
+<button class="diffBtn" onclick="chooseMode('moyen')"><span class="diffName">MOYEN</span><small>3 manches · chrono large · partie normale</small></button>
+<button class="diffBtn" onclick="chooseMode('difficile')"><span class="diffName">DIFFICILE</span><small>Surtout images · chrono serré · partie longue</small></button>
+</div>
+<button onclick="goTheme()">RETOUR</button></section>
+
+<!-- JEU (carte ~80%, posée sur le fond) -->
+<section class="screen hidden" id="game"><div class="quiz" id="quizPanel">
+
+  <!-- Sablier : à cheval entre la carte et le fond coloré -->
+  <div class="hourglass" id="hourglass"></div>
+
+  <div class="quizInner">
+
+  <!-- Barre HUD : score/série · manche+progression -->
+  <div class="gameHUD">
+    <div class="hudStat">SCORE <span class="gold" id="gameScore">0</span><br>SÉRIE <span class="gold" id="gameCombo">0</span></div>
+    <div class="hudMid">
+      <div class="labsRound" id="gameRound">MANCHE 1</div>
+      <div class="labsProgress"><span id="gameTheme">Thème</span> · <span id="cardCount">1 / 10</span></div>
+    </div>
+  </div>
+
+  <!-- Chrono « bien gros » (mode Chrono) -->
+  <div class="quizClock hidden" id="quizClock"><div class="quizClockBar" id="quizClockBar"></div></div>
+
+  <!-- Scène centrale : indice OU image -->
+  <div class="gameStage">
+    <div class="labsRoundTag" id="roundTag">DÉFINITION</div>
+    <h2 id="clue"></h2>
+    <div class="labsIcon hidden" id="iconBox"></div>
+  </div>
+
+  <!-- Réponses : grosses tuiles -->
+  <div class="answers" id="answers"></div>
+
+  <div class="explainBox hidden" id="explainBox"></div>
+  <div class="labsBtns">
+    <button class="continueBtn hidden" id="continueBtn" onclick="nextCard()">CONTINUER</button>
+    <button class="skipBtn" id="skipBtn" onclick="skipCard()">PASSER</button>
+  </div>
+
+  </div>
+</div></section>
+
+<!-- FIN -->
+<section class="screen hidden" id="end"><div class="panel result" id="endText"></div>
+<button onclick="replay()">REJOUER</button>
+<button onclick="goTheme()">AUTRE THÈME</button>
+<button onclick="showMenu()">MENU</button></section>
+
+</main>
+<script src="cards.js"></script>
+<script src="icons.js"></script>
+<script src="labsup.js"></script>
+</body></html>

@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Physique-Chimie — Accueil</title>
+  <style>
+    :root {
+      --bg: #f6f4ee;
+      --card: rgba(255,255,255,0.78);
+      --text: #1f2937;
+      --muted: #667085;
+      --line: rgba(31,41,55,0.12);
+      --accent: #2563eb;
+      --accent2: #06b6d4;
+      --shadow: 0 20px 50px rgba(31,41,55,0.10);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(37,99,235,0.18), transparent 34rem),
+        radial-gradient(circle at bottom right, rgba(6,182,212,0.18), transparent 30rem),
+        var(--bg);
+    }
+    header {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 56px 22px 24px;
+      text-align: center;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 13px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255,255,255,0.62);
+      color: var(--muted);
+      font-weight: 700;
+      font-size: 0.86rem;
+      backdrop-filter: blur(12px);
+    }
+    h1 {
+      margin: 18px 0 10px;
+      font-size: clamp(2.2rem, 6vw, 4.7rem);
+      line-height: 0.95;
+      letter-spacing: -0.06em;
+    }
+    .subtitle {
+      max-width: 720px;
+      margin: 0 auto;
+      color: var(--muted);
+      font-size: 1.08rem;
+      line-height: 1.65;
+    }
+    main {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 22px 22px 60px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 18px;
+    }
+    .card {
+      position: relative;
+      overflow: hidden;
+      min-height: 210px;
+      padding: 24px;
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      background: var(--card);
+      box-shadow: var(--shadow);
+      text-decoration: none;
+      color: inherit;
+      backdrop-filter: blur(18px);
+      transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+    }
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 28px 70px rgba(31,41,55,0.16);
+      border-color: rgba(37,99,235,0.24);
+    }
+    .card::after {
+      content: "";
+      position: absolute;
+      inset: auto -40px -50px auto;
+      width: 130px;
+      height: 130px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, rgba(37,99,235,0.18), rgba(6,182,212,0.20));
+    }
+    .emoji { font-size: 2.2rem; margin-bottom: 22px; }
+    h2 { margin: 0 0 8px; font-size: 1.35rem; letter-spacing: -0.03em; }
+    p { margin: 0; color: var(--muted); line-height: 1.5; }
+    .span2 { grid-column: span 2; }
+    .games { background: linear-gradient(145deg, rgba(255,255,255,0.83), rgba(230,246,255,0.78)); }
+    footer {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 22px 38px;
+      color: var(--muted);
+      text-align: center;
+      font-size: 0.92rem;
+    }
+    @media (max-width: 900px) {
+      .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 560px) {
+      header { padding-top: 36px; }
+      .grid { grid-template-columns: 1fr; }
+      .span2 { grid-column: span 1; }
+      .card { min-height: 170px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="badge">⚗️ Site de physique-chimie</div>
+    <h1>Physique-Chimie</h1>
+    <p class="subtitle">Accès rapide aux chapitres et aux jeux interactifs. Cette page sert d’accueil pour GitHub Pages.</p>
+  </header>
+
+  <main>
+    <section class="grid" aria-label="Navigation principale">
+      <a class="card" href="sciences-5eme.html">
+        <div class="emoji">🧪</div>
+        <h2>Chapitres 5e</h2>
+        <p>Cours interactifs et activités de niveau cinquième.</p>
+      </a>
+      <a class="card" href="sciences-4eme.html">
+        <div class="emoji">🔬</div>
+        <h2>Chapitres 4e</h2>
+        <p>Cours interactifs et activités de niveau quatrième.</p>
+      </a>
+      <a class="card" href="sciences-3eme.html">
+        <div class="emoji">⚡</div>
+        <h2>Chapitres 3e</h2>
+        <p>Page déjà reliée par les menus internes du site.</p>
+      </a>
+      <a class="card games" href="sciences-jeux.html">
+        <div class="emoji">🎮</div>
+        <h2>Jeux</h2>
+        <p>Temple du savoir, Panique au Labo, Labs'Up et Labo Kart.</p>
+      </a>
+    </section>
+  </main>
+
+  <footer>
+    Fichiers prêts pour une publication GitHub Pages depuis le dossier <strong>/docs</strong>.
+  </footer>
+</body>
+</html>
